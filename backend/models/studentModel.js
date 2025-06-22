@@ -1,20 +1,27 @@
 const mongoose = require('mongoose');
 
 const studentSchema = new mongoose.Schema({
-    
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User'
- },
-  gpa: Number,
-
-  institution: String,
-
-  income: Number,
-
-  profilePic: String,
-
-  resumeLink: String
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    enrolledCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+    }],
+    progress: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Progress',
+    }],
+}, {
+    timestamps: true,
 });
 
-module.exports = mongoose.model('student', studentSchema);
+const Student = mongoose.model('Student', studentSchema);
+
+module.exports = Student;
