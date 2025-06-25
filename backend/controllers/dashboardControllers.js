@@ -1,5 +1,5 @@
-const Application = require('../models/Application');
-const User = require('../models/User');
+const Application = require('../models/applicationModel');
+const User = require('../models/userModel');
 
 exports.getNGODashboard = async (req, res) => {
   try {

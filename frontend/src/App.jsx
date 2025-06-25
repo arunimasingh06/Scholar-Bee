@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import StudentSignup from './pages/StudentSignup';
 import SponsorSignup from './pages/SponsorSignup';
@@ -41,27 +42,83 @@ function App() {
             <Route path="/student/signup" element={<StudentSignup />} />
             <Route path="/sponsor/signup" element={<SponsorSignup />} />
             
-            {/* Student Routes */}
-            <Route path="/student/dashboard" element={<StudentDashboard />} />
-            <Route path="/student/profile" element={<StudentProfile />} />
-            <Route path="/student/applications" element={<StudentApplications />} />
-            <Route path="/student/apply/:id" element={<ScholarshipApplication />} />
+            {/* Protected Student Routes */}
+            <Route path="/student/dashboard" element={
+              <ProtectedRoute requiredRole="student">
+                <StudentDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/profile" element={
+              <ProtectedRoute requiredRole="student">
+                <StudentProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/applications" element={
+              <ProtectedRoute requiredRole="student">
+                <StudentApplications />
+              </ProtectedRoute>
+            } />
+            <Route path="/student/apply/:id" element={
+              <ProtectedRoute requiredRole="student">
+                <ScholarshipApplication />
+              </ProtectedRoute>
+            } />
             
-            {/* Sponsor Routes */}
-            <Route path="/sponsor/dashboard" element={<SponsorDashboard />} />
-            <Route path="/sponsor/profile" element={<SponsorProfile />} />
-            <Route path="/sponsor/create" element={<CreateScholarship />} />
-            <Route path="/sponsor/scholarships" element={<ManageScholarships />} />
-            <Route path="/sponsor/applications/:id" element={<ApplicationsManagement />} />
+            {/* Protected Sponsor Routes */}
+            <Route path="/sponsor/dashboard" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <SponsorDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/profile" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <SponsorProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/create" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <CreateScholarship />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/scholarships" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <ManageScholarships />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/applications/:id" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <ApplicationsManagement />
+              </ProtectedRoute>
+            } />
             
-            {/* Dashboard Routes */}
-            <Route path="/dashboards/ngo" element={<NGODashboard />} />
-            <Route path="/dashboards/student-progress" element={<StudentProgressView />} />
-            <Route path="/dashboards/admin" element={<AdminView />} />
+            {/* Protected Dashboard Routes */}
+            <Route path="/dashboards/ngo" element={
+              <ProtectedRoute>
+                <NGODashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboards/student-progress" element={
+              <ProtectedRoute>
+                <StudentProgressView />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboards/admin" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminView />
+              </ProtectedRoute>
+            } />
             
-            {/* Institutional Partnership Routes */}
-            <Route path="/institutional/college" element={<CollegePortal />} />
-            <Route path="/institutional/csr" element={<CSRPortal />} />
+            {/* Protected Institutional Partnership Routes */}
+            <Route path="/institutional/college" element={
+              <ProtectedRoute>
+                <CollegePortal />
+              </ProtectedRoute>
+            } />
+            <Route path="/institutional/csr" element={
+              <ProtectedRoute>
+                <CSRPortal />
+              </ProtectedRoute>
+            } />
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

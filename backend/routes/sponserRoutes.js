@@ -1,23 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const sponsorController = require('../backend/controllers/sponsorController');
-const { verifyToken, requireRole } = require('../middlewares/auth');
+const sponsorController = require('../controllers/sponserController');
+const { verifyToken, requireRole } = require('../middleware/auth');
 const { body } = require('express-validator');
 
-// Add at the bottom of sponsorRoutes.js
+// Profile routes
 router.get('/profile', verifyToken, requireRole('sponsor'), sponsorController.getProfile);
 router.put('/profile', verifyToken, requireRole('sponsor'), sponsorController.updateProfile);
 
+// Dashboard route
+router.get('/dashboard', verifyToken, requireRole('sponsor'), sponsorController.getSponsorDashboard);
 
-router.get('/dashboard', verifyToken, requireRole('sponsor'), sponsorController.getDashboard);
-router.get('/scholarships', verifyToken, requireRole('sponsor'), sponsorController.listScholarships);
+// Scholarship routes
+router.get('/scholarships', verifyToken, requireRole('sponsor'), sponsorController.getSponsorScholarships);
 router.post(
-  '/create',
+  '/scholarships/create',
   verifyToken,
   requireRole('sponsor'),
   [
     body('title').notEmpty(),
-    body('amountPerStudent').isNumeric(),
+    body('amount').isNumeric(),
     body('numberOfAwards').isNumeric(),
     body('deadline').notEmpty()
   ],
@@ -26,7 +28,8 @@ router.post(
 router.put('/scholarships/:id', verifyToken, requireRole('sponsor'), sponsorController.updateScholarship);
 router.patch('/scholarships/:id/close', verifyToken, requireRole('sponsor'), sponsorController.closeScholarship);
 
-router.get('/applications/:id', verifyToken, requireRole('sponsor'), sponsorController.getApplications);
+// Application routes
+router.get('/scholarships/:scholarshipId/applications', verifyToken, requireRole('sponsor'), sponsorController.getScholarshipApplications);
 router.patch('/applications/:id/decision', verifyToken, requireRole('sponsor'), sponsorController.decideApplication);
 
 module.exports = router;

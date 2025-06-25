@@ -2,32 +2,70 @@
 const mongoose = require("mongoose");
 
 const scholarshipSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  eligibilityCriteria: String,
-  category: [String],
-  amountPerStudent: { 
-    type: Number, 
-    required: true
- },
-  numberOfAwards: { 
-    type: Number, 
+  title: {
+    type: String,
     required: true
   },
-  deadline: { 
-    type: Date, 
+  description: {
+    type: String,
     required: true
   },
-  bannerUrl: String,
+  amount: {
+    type: Number,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true
+  },
+  difficulty: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Advanced'],
+    default: 'Beginner'
+  },
+  deadline: {
+    type: Date,
+    required: true
+  },
   sponsorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true
   },
+  requirements: [{
+    type: String
+  }],
+  tags: [{
+    type: String
+  }],
   status: {
     type: String,
-    enum: ["open", "closed"],
-    default: "open"
+    enum: ['active', 'inactive', 'completed', 'draft'],
+    default: 'active'
+  },
+  numberOfAwards: {
+    type: Number,
+    default: 1
+  },
+  totalBudget: {
+    type: Number,
+    required: true
+  },
+  applicants: {
+    type: Number,
+    default: 0
+  },
+  approved: {
+    type: Number,
+    default: 0
+  },
+  rejected: {
+    type: Number,
+    default: 0
+  },
+  pending: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { userAPI } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import { 
   User, 
@@ -12,52 +14,58 @@ import {
   Upload,
   Award,
   Star,
-  CheckCircle
+  CheckCircle,
+  Loader
 } from 'lucide-react';
 
 const StudentProfile = () => {
+  const { user, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [profileData, setProfileData] = useState({
-    fullName: 'Ujjwal Kumar',
-    email: 'ujjwal.kumar@email.com',
-    phone: '+91 9876543210',
-    dateOfBirth: '2000-05-15',
-    gender: 'Male',
-    city: 'Delhi',
-    state: 'Delhi',
-    educationLevel: 'Undergraduate',
-    institution: 'Delhi University',
-    course: 'Computer Science',
-    year: '3rd Year',
-    gpa: '8.5 CGPA',
-    familyIncome: '2-5lakh',
-    interests: 'Web Development, Machine Learning, Community Service',
-    bio: 'Passionate computer science student with a keen interest in technology and social impact. Always eager to learn new skills and contribute to meaningful projects.'
+    fullname: '',
+    email: '',
+    phone: '',
+    institution: '',
+    educationLevel: '',
+    gpa: '',
+    familyIncome: '',
+    skills: []
   });
 
-  const achievements = [
-    {
-      id: 1,
-      title: 'Python Programming Expert',
-      date: '2025-01-15',
-      amount: 1000,
-      badge: 'Expert'
-    },
-    {
-      id: 2,
-      title: 'Community Impact Leader',
-      date: '2025-01-10',
-      amount: 750,
-      badge: 'Leader'
-    },
-    {
-      id: 3,
-      title: 'Data Science Fundamentals',
-      date: '2024-12-20',
-      amount: 500,
-      badge: 'Certified'
-    }
-  ];
+  // Load user profile data from backend
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!isAuthenticated) {
+        setError('Please login to view your profile');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const userData = await userAPI.getProfile();
+        setProfileData({
+          fullname: userData.fullname || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          institution: userData.institution || '',
+          educationLevel: userData.educationLevel || '',
+          gpa: userData.gpa || '',
+          familyIncome: userData.familyIncome || '',
+          skills: userData.skills || []
+        });
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        setError('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [isAuthenticated]);
 
   const handleInputChange = (e) => {
     setProfileData(prev => ({
@@ -66,10 +74,46 @@ const StudentProfile = () => {
     }));
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Here you would typically save the data to your backend
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      await userAPI.updateProfile(profileData);
+      setIsEditing(false);
+      setError('');
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setError('Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -90,26 +134,33 @@ const StudentProfile = () => {
               </div>
               
               <div className="text-center sm:text-left flex-1">
-                <h1 className="text-2xl font-bold text-white">{profileData.fullName}</h1>
-                <p className="text-blue-100">{profileData.course} • {profileData.institution}</p>
+                <h1 className="text-2xl font-bold text-white">{profileData.fullname || 'Student'}</h1>
+                <p className="text-blue-100">{profileData.educationLevel} • {profileData.institution}</p>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
                   <div className="bg-white/20 text-white px-3 py-1 rounded-full text-sm flex items-center">
                     <Star className="w-4 h-4 mr-1" />
-                    Level 5 Learner
+                    Student
                   </div>
                   <div className="bg-white/20 text-white px-3 py-1 rounded-full text-sm flex items-center">
                     <Award className="w-4 h-4 mr-1" />
-                    8 Achievements
+                    {profileData.skills?.length || 0} Skills
                   </div>
                 </div>
               </div>
               
               <button
                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                className="bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                disabled={isLoading}
+                className="bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
-                {isEditing ? <Save className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-                <span>{isEditing ? 'Save Changes' : 'Edit Profile'}</span>
+                {isLoading ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : isEditing ? (
+                  <Save className="w-4 h-4" />
+                ) : (
+                  <Edit3 className="w-4 h-4" />
+                )}
+                <span>{isLoading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}</span>
               </button>
             </div>
           </div>
@@ -131,13 +182,13 @@ const StudentProfile = () => {
                       {isEditing ? (
                         <input
                           type="text"
-                          name="fullName"
-                          value={profileData.fullName}
+                          name="fullname"
+                          value={profileData.fullname}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.fullName}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.fullname || 'Not provided'}</p>
                       )}
                     </div>
                     
@@ -154,7 +205,7 @@ const StudentProfile = () => {
                       ) : (
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg flex items-center">
                           <Mail className="w-4 h-4 mr-2" />
-                          {profileData.email}
+                          {profileData.email || 'Not provided'}
                         </p>
                       )}
                     </div>
@@ -172,25 +223,7 @@ const StudentProfile = () => {
                       ) : (
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg flex items-center">
                           <Phone className="w-4 h-4 mr-2" />
-                          {profileData.phone}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
-                      {isEditing ? (
-                        <input
-                          type="date"
-                          name="dateOfBirth"
-                          value={profileData.dateOfBirth}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg flex items-center">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {new Date(profileData.dateOfBirth).toLocaleDateString()}
+                          {profileData.phone || 'Not provided'}
                         </p>
                       )}
                     </div>
@@ -200,30 +233,11 @@ const StudentProfile = () => {
                 {/* Academic Information */}
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <GraduationCap className="w-5 h-5 mr-2 text-purple-600" />
+                    <GraduationCap className="w-5 h-5 mr-2 text-blue-600" />
                     Academic Information
                   </h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Education Level</label>
-                      {isEditing ? (
-                        <select
-                          name="educationLevel"
-                          value={profileData.educationLevel}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="High School">High School</option>
-                          <option value="Diploma">Diploma</option>
-                          <option value="Undergraduate">Undergraduate</option>
-                          <option value="Postgraduate">Postgraduate</option>
-                        </select>
-                      ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.educationLevel}</p>
-                      )}
-                    </div>
-                    
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Institution</label>
                       {isEditing ? (
@@ -235,27 +249,35 @@ const StudentProfile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.institution}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg flex items-center">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {profileData.institution || 'Not provided'}
+                        </p>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Course</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Education Level</label>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          name="course"
-                          value={profileData.course}
+                        <select
+                          name="educationLevel"
+                          value={profileData.educationLevel}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                        >
+                          <option value="">Select Level</option>
+                          <option value="High School">High School</option>
+                          <option value="Undergraduate">Undergraduate</option>
+                          <option value="Graduate">Graduate</option>
+                          <option value="PhD">PhD</option>
+                        </select>
                       ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.course}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.educationLevel || 'Not provided'}</p>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">GPA / Percentage</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">GPA</label>
                       {isEditing ? (
                         <input
                           type="text"
@@ -263,89 +285,65 @@ const StudentProfile = () => {
                           value={profileData.gpa}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="e.g., 3.8"
                         />
                       ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.gpa}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Information */}
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Additional Information</h2>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-                      {isEditing ? (
-                        <textarea
-                          name="bio"
-                          rows={4}
-                          value={profileData.bio}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.bio}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.gpa || 'Not provided'}</p>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Skills & Interests</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Family Income</label>
                       {isEditing ? (
-                        <textarea
-                          name="interests"
-                          rows={3}
-                          value={profileData.interests}
+                        <input
+                          type="text"
+                          name="familyIncome"
+                          value={profileData.familyIncome}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="e.g., 50000"
                         />
                       ) : (
-                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.interests}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{profileData.familyIncome || 'Not provided'}</p>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Achievements Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <Award className="w-5 h-5 mr-2 text-purple-600" />
-                    Recent Achievements
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    {achievements.map((achievement) => (
-                      <div key={achievement.id} className="bg-white rounded-lg p-4 border border-purple-100">
-                        <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-medium text-gray-900 text-sm">{achievement.title}</h4>
-                          <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 ml-2" />
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-gray-600">
-                          <span className="text-green-600 font-medium">₹{achievement.amount}</span>
-                          <span>{new Date(achievement.date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="mt-2">
-                          <span className="inline-block bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                            {achievement.badge}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 pt-4 border-t border-purple-200">
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600 mb-2">Profile Completion</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full" style={{ width: '85%' }}></div>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">85% Complete</p>
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Quick Stats */}
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-3">Quick Stats</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Profile Complete</span>
+                      <span className="font-medium text-blue-900">
+                        {Math.round((Object.values(profileData).filter(v => v && v.length > 0).length / Object.keys(profileData).length) * 100)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Skills</span>
+                      <span className="font-medium text-blue-900">{profileData.skills?.length || 0}</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Skills */}
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <h3 className="font-semibold text-gray-900 mb-3">Skills</h3>
+                  {profileData.skills && profileData.skills.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {profileData.skills.map((skill, index) => (
+                        <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No skills added yet</p>
+                  )}
                 </div>
               </div>
             </div>

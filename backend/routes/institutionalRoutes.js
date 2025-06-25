@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const dashboardController = require('../controllers/dashboardController');
-const { verifyToken, requireRole } = require('../middlewares/auth');
+const dashboardController = require('../controllers/dashboardControllers');
+const { verifyToken, requireRole } = require('../middleware/auth');
 
 // NGO Dashboard
 router.get('/ngo', verifyToken, requireRole('sponsor'), dashboardController.getNGODashboard);

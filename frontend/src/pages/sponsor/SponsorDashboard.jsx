@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { sponsorAPI } from '../../services/api';
 import { 
   Award,
   Users, 
@@ -11,296 +12,282 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  Heart
+  Heart,
+  Loader,
+  AlertCircle
 } from 'lucide-react';
 
-const SponsorDashboard= () => {
-  // Mock data
-  const stats = {
-    totalDonated: 25000,
-    studentsHelped: 15,
-    activeScholarships: 4,
-    completedScholarships: 8
+const SponsorDashboard = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    stats: {
+      totalDonated: 0,
+      studentsHelped: 0,
+      activeScholarships: 0,
+      completedScholarships: 0
+    },
+    recentScholarships: [],
+    recentApplications: []
+  });
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const data = await sponsorAPI.getDashboard();
+      setDashboardData(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentScholarships = [
-    {
-      id: 1,
-      title: 'Python Programming Mastery',
-      amount: 1000,
-      applicants: 23,
-      approved: 3,
-      deadline: '2025-02-15',
-      status: 'active'
-    },
-    {
-      id: 2,
-      title: 'Community Leadership Project',
-      amount: 750,
-      applicants: 15,
-      approved: 2,
-      deadline: '2025-02-28',
-      status: 'active'
-    },
-    {
-      id: 3,
-      title: 'Data Science Certification',
-      amount: 1200,
-      applicants: 8,
-      approved: 1,
-      deadline: '2025-01-30',
-      status: 'completed'
-    }
-  ];
-
-  const recentApplications = [
-    {
-      id: 1,
-      studentName: 'Priya Sharma',
-      scholarshipTitle: 'Python Programming Mastery',
-      appliedDate: '2025-01-22',
-      status: 'pending',
-      gpa: '8.7 CGPA',
-      institution: 'IIT Delhi'
-    },
-    {
-      id: 2,
-      studentName: 'Rahul Kumar',
-      scholarshipTitle: 'Community Leadership Project',
-      appliedDate: '2025-01-21',
-      status: 'approved',
-      gpa: '9.1 CGPA',
-      institution: 'Delhi University'
-    },
-    {
-      id: 3,
-      studentName: 'Anita Patel',
-      scholarshipTitle: 'Data Science Certification',
-      appliedDate: '2025-01-20',
-      status: 'in_review',
-      gpa: '8.9 CGPA',
-      institution: 'Mumbai University'
-    }
-  ];
-
-  const impactMetrics = [
-    { label: 'Students Graduated', value: 12, icon: '🎓' },
-    { label: 'Skills Developed', value: 45, icon: '💡' },
-    { label: 'Projects Completed', value: 28, icon: '🚀' },
-    { label: 'Communities Impacted', value: 8, icon: '🌟' }
-  ];
+  const { stats, recentScholarships, recentApplications } = dashboardData;
 
   const getStatusColor = (status) => {
     switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'approved': return 'bg-green-100 text-green-800';
-      case 'in_review': return 'bg-blue-100 text-blue-800';
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
+      case 'in_review': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'active': return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'completed': return <Award className="w-4 h-4 text-blue-600" />;
+      case 'pending': return <Clock className="w-4 h-4 text-yellow-600" />;
+      case 'approved': return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case 'in_review': return <Eye className="w-4 h-4 text-purple-600" />;
+      default: return <Clock className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={fetchDashboardData}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Header */}
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, Tech Foundation! 👋</h1>
-          <p className="text-gray-600">Track your impact and manage scholarships to empower the next generation of learners.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Sponsor Dashboard</h1>
+          <p className="text-gray-600 mt-2">Track your impact and manage your scholarship programs</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Donated</p>
-                <p className="text-2xl font-bold text-purple-600 flex items-center">
-                  <IndianRupee className="w-5 h-5 mr-1" />
-                  {stats.totalDonated.toLocaleString()}
-                </p>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <IndianRupee className="w-6 h-6 text-green-600" />
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Donated</p>
+                <p className="text-2xl font-bold text-gray-900">₹{stats.totalDonated.toLocaleString()}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Students Helped</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.studentsHelped}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
                 <Users className="w-6 h-6 text-blue-600" />
               </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Students Helped</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.studentsHelped}</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Award className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Scholarships</p>
-                <p className="text-2xl font-bold text-green-600">{stats.activeScholarships}</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Award className="w-6 h-6 text-green-600" />
+                <p className="text-2xl font-bold text-gray-900">{stats.activeScholarships}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <CheckCircle className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.completedScholarships}</p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-orange-600" />
+                <p className="text-2xl font-bold text-gray-900">{stats.completedScholarships}</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 mb-8 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Ready to make a difference?</h2>
-              <p className="text-purple-100">Create a new scholarship and help students achieve their learning goals.</p>
-            </div>
-            <Link
-              to="/sponsor/create"
-              className="mt-4 md:mt-0 bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center space-x-2"
-            >
-              <PlusCircle className="w-5 h-5" />
-              <span>Create Scholarship</span>
-            </Link>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* My Scholarships */}
+          {/* Recent Scholarships */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <Award className="w-5 h-5 mr-2 text-purple-600" />
-                    My Scholarships
-                  </h2>
+                  <h2 className="text-xl font-semibold text-gray-900">Recent Scholarships</h2>
                   <Link
                     to="/sponsor/scholarships"
-                    className="text-purple-600 hover:text-purple-800 font-medium text-sm"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     View All
                   </Link>
                 </div>
               </div>
-
+              
               <div className="p-6">
-                <div className="space-y-4">
-                  {recentScholarships.map((scholarship) => (
-                    <div key={scholarship.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">{scholarship.title}</h3>
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <span className="flex items-center">
-                              <IndianRupee className="w-4 h-4 mr-1" />
-                              {scholarship.amount.toLocaleString()}
-                            </span>
-                            <span className="flex items-center">
-                              <Users className="w-4 h-4 mr-1" />
-                              {scholarship.applicants} applicants
-                            </span>
-                            <span className="flex items-center">
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              {scholarship.approved} approved
-                            </span>
-                          </div>
+                {recentScholarships.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No scholarships yet</p>
+                    <Link
+                      to="/sponsor/create-scholarship"
+                      className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Create First Scholarship
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentScholarships.map((scholarship) => (
+                      <div key={scholarship.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900">{scholarship.title}</h3>
+                          <span className="text-lg font-bold text-green-600">₹{scholarship.amount}</span>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(scholarship.status)}`}>
-                          {scholarship.status === 'active' ? 'Active' : 'Completed'}
-                        </span>
+                        
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                          <span>{scholarship.applicants} applicants</span>
+                          <span>{scholarship.approved} approved</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Deadline: {new Date(scholarship.deadline).toLocaleDateString()}
+                          </div>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(scholarship.status)}`}>
+                            {scholarship.status}
+                          </span>
+                        </div>
                       </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          Deadline: {new Date(scholarship.deadline).toLocaleDateString()}
-                        </span>
-                        <Link
-                          to={`/sponsor/applications/${scholarship.id}`}
-                          className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View Applications
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Recent Applications & Impact */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Recent Applications */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          {/* Recent Applications */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">Recent Applications</h2>
               </div>
               
               <div className="p-6">
-                <div className="space-y-4">
-                  {recentApplications.map((application) => (
-                    <div key={application.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Users className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{application.studentName}</p>
-                        <p className="text-xs text-gray-600 mb-1">{application.scholarshipTitle}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">{application.institution}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
-                            {application.status === 'in_review' ? 'In Review' : application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                {recentApplications.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No applications yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentApplications.map((application) => (
+                      <div key={application.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-gray-900">{application.studentName}</h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(application.status)}`}>
+                            {application.status}
                           </span>
                         </div>
+                        
+                        <p className="text-sm text-gray-600 mb-2">{application.scholarshipTitle}</p>
+                        
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span>{application.gpa}</span>
+                          <span>{application.institution}</span>
+                        </div>
+                        
+                        <p className="text-xs text-gray-400 mt-2">
+                          Applied: {new Date(application.appliedDate).toLocaleDateString()}
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Impact Metrics */}
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl border border-green-200 p-6">
+            {/* Quick Actions */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-6 mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Heart className="w-5 h-5 mr-2 text-green-600" />
-                Your Impact
+                <Heart className="w-5 h-5 mr-2 text-blue-600" />
+                Quick Actions
               </h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {impactMetrics.map((metric, index) => (
-                  <div key={index} className="bg-white rounded-lg p-4 text-center">
-                    <div className="text-2xl mb-1">{metric.icon}</div>
-                    <div className="text-xl font-bold text-gray-900">{metric.value}</div>
-                    <div className="text-xs text-gray-600">{metric.label}</div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-green-200">
-                <p className="text-sm text-gray-700 text-center">
-                  <strong>Thank you!</strong> Your contributions have made a real difference in students' lives.
-                </p>
+              <div className="space-y-3">
+                <Link
+                  to="/sponsor/create-scholarship"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block"
+                >
+                  <PlusCircle className="w-4 h-4 inline mr-2" />
+                  Create New Scholarship
+                </Link>
+                <Link
+                  to="/sponsor/scholarships"
+                  className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-center block"
+                >
+                  <Eye className="w-4 h-4 inline mr-2" />
+                  Manage Scholarships
+                </Link>
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
-const Scholarship = require('../models/Scholarship');
-const Application = require('../models/Application');
+const Scholarship = require('../models/scholarshipModel');
+const Application = require('../models/applicationModel');
 const mongoose = require('mongoose');
-const User = require('../models/User');
+const User = require('../models/userModel');
 
 // GET /sponsor/profile
 exports.getProfile = async (req, res) => {
@@ -38,19 +38,160 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
-exports.getDashboard = async (req, res) => {
+// Get sponsor dashboard data
+exports.getSponsorDashboard = async (req, res) => {
   try {
-    const scholarships = await Scholarship.find({ sponsorId: req.user.id });
-    const totalAmount = scholarships.reduce((acc, s) => acc + (s.amountPerStudent * s.numberOfAwards), 0);
-    const applications = await Application.find({ scholarshipId: { $in: scholarships.map(s => s._id) } });
-    res.json({
-      scholarshipsCount: scholarships.length,
-      totalAmount,
-      applicants: applications.length
+    const sponsorId = req.user.id;
+
+    // Get sponsor's scholarships
+    const scholarships = await Scholarship.find({ sponsorId })
+      .sort({ createdAt: -1 });
+
+    // Calculate statistics
+    const totalDonated = scholarships
+      .filter(sch => sch.status === 'completed')
+      .reduce((sum, sch) => sum + sch.totalBudget, 0);
+
+    const studentsHelped = await Application.countDocuments({
+      scholarshipId: { $in: scholarships.map(s => s._id) },
+      status: 'funded'
     });
-  } catch (err) {
-    res.status(500).json({ message: 'Dashboard failed' });
+
+    const activeScholarships = scholarships.filter(sch => sch.status === 'active').length;
+    const completedScholarships = scholarships.filter(sch => sch.status === 'completed').length;
+
+    // Get recent scholarships
+    const recentScholarships = scholarships.slice(0, 3).map(sch => ({
+      id: sch._id,
+      title: sch.title,
+      amount: sch.amount,
+      applicants: sch.applicants,
+      approved: sch.approved,
+      deadline: sch.deadline,
+      status: sch.status
+    }));
+
+    // Get recent applications
+    const recentApplications = await Application.find({
+      scholarshipId: { $in: scholarships.map(s => s._id) }
+    })
+    .populate('studentId', 'fullname email')
+    .populate('scholarshipId', 'title')
+    .sort({ createdAt: -1 })
+    .limit(3);
+
+    const formattedApplications = recentApplications.map(app => ({
+      id: app._id,
+      studentName: app.studentId.fullname,
+      scholarshipTitle: app.scholarshipId.title,
+      appliedDate: app.createdAt,
+      status: app.status,
+      gpa: app.studentId.gpa || 'N/A',
+      institution: app.studentId.institution || 'N/A'
+    }));
+
+    res.json({
+      stats: {
+        totalDonated,
+        studentsHelped,
+        activeScholarships,
+        completedScholarships
+      },
+      recentScholarships,
+      recentApplications: formattedApplications
+    });
+  } catch (error) {
+    console.error('Error fetching sponsor dashboard:', error);
+    res.status(500).json({ message: 'Error fetching dashboard data' });
+  }
+};
+
+// Get sponsor's scholarships
+exports.getSponsorScholarships = async (req, res) => {
+  try {
+    const sponsorId = req.user.id;
+    const scholarships = await Scholarship.find({ sponsorId })
+      .sort({ createdAt: -1 });
+
+    const formattedScholarships = scholarships.map(sch => ({
+      id: sch._id,
+      title: sch.title,
+      description: sch.description,
+      category: sch.category,
+      amount: sch.amount,
+      numberOfAwards: sch.numberOfAwards,
+      totalBudget: sch.totalBudget,
+      deadline: sch.deadline,
+      createdDate: sch.createdAt,
+      status: sch.status,
+      applicants: sch.applicants,
+      approved: sch.approved,
+      rejected: sch.rejected,
+      pending: sch.pending,
+      tags: sch.tags
+    }));
+
+    res.json({ scholarships: formattedScholarships });
+  } catch (error) {
+    console.error('Error fetching sponsor scholarships:', error);
+    res.status(500).json({ message: 'Error fetching scholarships' });
+  }
+};
+
+// Get applications for a specific scholarship
+exports.getScholarshipApplications = async (req, res) => {
+  try {
+    const { scholarshipId } = req.params;
+    const sponsorId = req.user.id;
+
+    // Verify the scholarship belongs to the sponsor
+    const scholarship = await Scholarship.findOne({ _id: scholarshipId, sponsorId });
+    if (!scholarship) {
+      return res.status(404).json({ message: 'Scholarship not found' });
+    }
+
+    const applications = await Application.find({ scholarshipId })
+      .populate('studentId', 'fullname email phone institution course year gpa city')
+      .sort({ createdAt: -1 });
+
+    const formattedApplications = applications.map(app => ({
+      id: app._id,
+      student: {
+        name: app.studentId.fullname,
+        email: app.studentId.email,
+        phone: app.studentId.phone,
+        institution: app.studentId.institution,
+        course: app.studentId.course,
+        year: app.studentId.year,
+        gpa: app.studentId.gpa,
+        city: app.studentId.city
+      },
+      appliedDate: app.createdAt,
+      status: app.status,
+      essay: app.essay,
+      projectPlan: app.projectPlan,
+      timeline: app.timeline,
+      documents: app.documents,
+      reviewNotes: app.reviewNotes,
+      reviewedAt: app.reviewedAt,
+      submittedAt: app.createdAt
+    }));
+
+    res.json({
+      scholarship: {
+        id: scholarship._id,
+        title: scholarship.title,
+        amount: scholarship.amount,
+        numberOfAwards: scholarship.numberOfAwards,
+        deadline: scholarship.deadline,
+        description: scholarship.description,
+        requirements: scholarship.requirements
+      },
+      applications: formattedApplications
+    });
+  } catch (error) {
+    console.error('Error fetching scholarship applications:', error);
+    res.status(500).json({ message: 'Error fetching applications' });
   }
 };
 

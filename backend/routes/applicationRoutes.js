@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const applicationController = require('../controllers/applicationController');
-const { verifyToken, requireRole } = require('../middlewares/auth');
+const { verifyToken, requireRole } = require('../middleware/auth');
 
 // Student applies for scholarship
 router.post(

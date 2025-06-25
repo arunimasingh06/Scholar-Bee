@@ -1,5 +1,5 @@
-const Application = require('../models/Application');
-const Scholarship = require('../models/Scholarship');
+const Application = require('../models/applicationModel');
+const Scholarship = require('../models/scholarshipModel');
 
 // 📥 Submit new application
 exports.submitApplication = async (req, res) => {

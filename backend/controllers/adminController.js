@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const Scholarship = require('../models/Scholarship');
-const Application = require('../models/Application');
+const User = require('../models/userModel');
+const Scholarship = require('../models/scholarshipModel');
+const Application = require('../models/applicationModel');
 
 exports.getAdminDashboard = async (req, res) => {
   try {
