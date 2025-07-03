@@ -188,7 +188,7 @@ const SponsorDashboard = () => {
                     <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">No scholarships yet</p>
                     <Link
-                      to="/sponsor/create-scholarship"
+                      to="/sponsor/create"
                       className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       <PlusCircle className="w-4 h-4 mr-2" />

@@ -57,7 +57,22 @@ exports.registerSponsor = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'Sponsor registered successfully' });
+
+    // Generate JWT token for the new sponsor
+    const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(201).json({
+      message: 'Sponsor registered successfully',
+      token,
+      user: {
+        id: newUser._id,
+        fullname: newUser.fullname,
+        email: newUser.email,
+        role: newUser.role,
+        organizationType: newUser.organizationType,
+        organizationName: newUser.organizationName
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Registration failed' });
   }

@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Map frontend field names to backend field names
       const mappedData = {
-        fullname: userData.fullName,
+        fullname: role === 'sponsor' ? userData.organizationName : userData.fullName,
         email: userData.email,
         password: userData.password,
         ...(role === 'student' && {

@@ -22,7 +22,7 @@ import {
 const ApplicationsManagement = () => {
   const { id } = useParams();
   const [selectedTab, setSelectedTab] = useState('all');
-  const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState(null);
 
   // Mock scholarship data
   const scholarship = {

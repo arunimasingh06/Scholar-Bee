@@ -3,6 +3,7 @@ const Course = require('./models/courseModel');
 const Scholarship = require('./models/scholarshipModel');
 const User = require('./models/userModel');
 const Application = require('./models/applicationModel');
+const bcrypt = require('bcryptjs');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/scholarbee', {
@@ -130,16 +131,25 @@ const seedData = async () => {
 
     // Get or create a sponsor user
     let sponsor = await User.findOne({ email: 'sponsor@example.com' });
+    const hashedPassword = await bcrypt.hash('password123', 10);
     if (!sponsor) {
       sponsor = await User.create({
         fullname: 'Tech Foundation',
         email: 'sponsor@example.com',
-        password: 'password123',
+        password: hashedPassword,
         role: 'sponsor',
         phone: '+91 9876543210',
         organization: 'Tech Foundation',
         city: 'Mumbai'
       });
+    } else {
+      sponsor.fullname = 'Tech Foundation';
+      sponsor.password = hashedPassword;
+      sponsor.role = 'sponsor';
+      sponsor.phone = '+91 9876543210';
+      sponsor.organization = 'Tech Foundation';
+      sponsor.city = 'Mumbai';
+      await sponsor.save();
     }
 
     // Create sample scholarships
@@ -335,11 +345,12 @@ const seedData = async () => {
 
     // Get or create a student user
     let student = await User.findOne({ email: 'student@example.com' });
+    const hashedStudentPassword = await bcrypt.hash('password123', 10);
     if (!student) {
       student = await User.create({
         fullname: 'Amritansh',
         email: 'student@example.com',
-        password: 'password123',
+        password: hashedStudentPassword, // password123
         role: 'student',
         phone: '+91 9876543211',
         institution: 'IIT Delhi',
@@ -348,6 +359,17 @@ const seedData = async () => {
         gpa: '8.7',
         city: 'Delhi'
       });
+    } else {
+      student.fullname = 'Amritansh';
+      student.password = hashedStudentPassword;
+      student.role = 'student';
+      student.phone = '+91 9876543211';
+      student.institution = 'IIT Delhi';
+      student.course = 'Computer Science';
+      student.year = '3rd Year';
+      student.gpa = '8.7';
+      student.city = 'Delhi';
+      await student.save();
     }
 
     // Create sample applications
