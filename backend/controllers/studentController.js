@@ -3,7 +3,7 @@ const Scholarship = require('../models/scholarshipModel');
 const User = require('../models/userModel');
 
 /**
- * 🎓 Student Dashboard Controller
+ * Student Dashboard Controller
  * Retrieves all open scholarships for the student dashboard
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -20,7 +20,7 @@ exports.getDashboard = async (req, res) => {
 };
 
 /**
- * 📋 Get Student Applications Controller
+ *  Get Student Applications Controller
  * Retrieves all applications submitted by the current student
  * @param {Object} req - Express request object (contains user info from auth middleware)
  * @param {Object} res - Express response object
@@ -37,7 +37,7 @@ exports.getApplications = async (req, res) => {
 };
 
 /**
- * 📝 Apply for Scholarship Controller
+ * Apply for Scholarship Controller
  * Allows students to submit new scholarship applications
  * @param {Object} req - Express request object
  * @param {Object} req.params - Contains scholarshipId
@@ -85,10 +85,9 @@ exports.getStudentDashboard = async (req, res) => {
     const pendingApplications = applications.filter(app => app.status === 'pending').length;
     const currentStreak = 12; // This could be calculated based on activity
 
-    // Get available scholarships
+    // Get all scholarships (no deadline filter)
     const availableScholarships = await Scholarship.find({ 
-      status: 'active',
-      deadline: { $gt: new Date() }
+      status: 'active'
     })
     .populate('sponsorId', 'fullname')
     .limit(10);
@@ -127,6 +126,42 @@ exports.getStudentDashboard = async (req, res) => {
   } catch (error) {
     console.error('Error fetching student dashboard:', error);
     res.status(500).json({ message: 'Error fetching dashboard data' });
+  }
+};
+
+// Public endpoint to get scholarships (no authentication required)
+exports.getPublicScholarships = async (req, res) => {
+  try {
+    // Get all scholarships (no deadline filter)
+    const availableScholarships = await Scholarship.find({ 
+      status: 'active'
+    })
+    .populate('sponsorId', 'fullname')
+    .limit(10);
+
+    res.json({
+      stats: {
+        totalEarned: 0,
+        completedTasks: 0,
+        pendingApplications: 0,
+        currentStreak: 0
+      },
+      scholarships: availableScholarships.map(scholarship => ({
+        id: scholarship._id,
+        title: scholarship.title,
+        amount: scholarship.amount,
+        deadline: scholarship.deadline,
+        category: scholarship.category,
+        difficulty: scholarship.difficulty,
+        applicants: scholarship.applicants,
+        description: scholarship.description,
+        tags: scholarship.tags
+      })),
+      recentActivities: []
+    });
+  } catch (error) {
+    console.error('Error fetching public scholarships:', error);
+    res.status(500).json({ message: 'Error fetching scholarships' });
   }
 };
 

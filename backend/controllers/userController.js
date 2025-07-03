@@ -57,8 +57,8 @@ exports.changePassword = async (req, res) => {
 };
 
 
-// ✅ Role-based validation is now added in the updateProfile controller:
+// Role-based validation is now added in the updateProfile controller:
 
-// 🎓 If the user is not a student, all student-specific fields (e.g., institution, gpa) are ignored.
+//  If the user is not a student, all student-specific fields (e.g., institution, gpa) are ignored.
 
-// 🧑‍💼 If the user is not a sponsor, sponsor fields (e.g., organizationName, missionStatement) are also stripped before update.
+//  If the user is not a sponsor, sponsor fields (e.g., organizationName, missionStatement) are also stripped before update.

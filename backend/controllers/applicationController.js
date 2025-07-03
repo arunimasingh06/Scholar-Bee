@@ -1,7 +1,7 @@
 const Application = require('../models/applicationModel');
 const Scholarship = require('../models/scholarshipModel');
 
-// 📥 Submit new application
+//  Submit new application
 exports.submitApplication = async (req, res) => {
   const { scholarshipId } = req.params;
   const { essayText, documents } = req.body;
@@ -35,7 +35,7 @@ exports.submitApplication = async (req, res) => {
   }
 };
 
-// 📃 Get all applications for a scholarship (sponsor view)
+//  Get all applications for a scholarship (sponsor view)
 exports.getScholarshipApplications = async (req, res) => {
   try {
     const apps = await Application.find({ scholarshipId: req.params.id })
@@ -48,7 +48,7 @@ exports.getScholarshipApplications = async (req, res) => {
   }
 };
 
-// ✅ Approve/Reject application
+//  Approve/Reject application
 exports.decideApplication = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -69,7 +69,7 @@ exports.decideApplication = async (req, res) => {
   }
 };
 
-// 📄 Upload receipt (student after award)
+//  Upload receipt (student after award)
 exports.uploadReceipt = async (req, res) => {
   const { id } = req.params;
   const { receiptUrl } = req.body;
@@ -90,7 +90,7 @@ exports.uploadReceipt = async (req, res) => {
   }
 };
 
-// 🔎 Verify receipt (admin/sponsor)
+//  Verify receipt (admin/sponsor)
 exports.verifyReceipt = async (req, res) => {
   const { id } = req.params;
 

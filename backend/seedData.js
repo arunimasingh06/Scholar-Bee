@@ -205,13 +205,128 @@ const seedData = async () => {
           'Include code repository and documentation'
         ],
         tags: ['Data Science', 'Analytics', 'Certification'],
-        status: 'completed',
+        status: 'active',
         numberOfAwards: 3,
         totalBudget: 3600,
         applicants: 8,
         approved: 3,
         rejected: 2,
         pending: 0
+      },
+      {
+        title: 'Web Development Bootcamp',
+        description: 'Learn full-stack web development and build a complete web application.',
+        amount: 1500,
+        category: 'Programming',
+        difficulty: 'Intermediate',
+        deadline: new Date('2025-03-15'),
+        sponsorId: sponsor._id,
+        requirements: [
+          'Complete HTML, CSS, and JavaScript fundamentals',
+          'Build a responsive web application',
+          'Deploy the application to a live server',
+          'Write documentation for your project'
+        ],
+        tags: ['Web Development', 'JavaScript', 'Full Stack'],
+        status: 'active',
+        numberOfAwards: 6,
+        totalBudget: 9000,
+        applicants: 31,
+        approved: 4,
+        rejected: 3,
+        pending: 24
+      },
+      {
+        title: 'Digital Marketing Project',
+        description: 'Create and execute a digital marketing campaign for a local business.',
+        amount: 800,
+        category: 'Marketing',
+        difficulty: 'Beginner',
+        deadline: new Date('2025-02-20'),
+        sponsorId: sponsor._id,
+        requirements: [
+          'Develop a marketing strategy for a local business',
+          'Create social media content and campaigns',
+          'Track and analyze campaign performance',
+          'Present results and recommendations'
+        ],
+        tags: ['Marketing', 'Social Media', 'Analytics'],
+        status: 'active',
+        numberOfAwards: 10,
+        totalBudget: 8000,
+        applicants: 18,
+        approved: 5,
+        rejected: 2,
+        pending: 11
+      },
+      {
+        title: 'UI/UX Design Portfolio',
+        description: 'Create a professional UI/UX design portfolio with 3 complete projects.',
+        amount: 1100,
+        category: 'Design',
+        difficulty: 'Intermediate',
+        deadline: new Date('2025-03-01'),
+        sponsorId: sponsor._id,
+        requirements: [
+          'Design 3 complete user interfaces',
+          'Create wireframes and prototypes',
+          'Conduct user research and testing',
+          'Present your design process and decisions'
+        ],
+        tags: ['UI Design', 'UX Research', 'Prototyping'],
+        status: 'active',
+        numberOfAwards: 4,
+        totalBudget: 4400,
+        applicants: 12,
+        approved: 2,
+        rejected: 1,
+        pending: 9
+      },
+      {
+        title: 'Business Plan Competition',
+        description: 'Develop a comprehensive business plan for a startup idea.',
+        amount: 2000,
+        category: 'Business',
+        difficulty: 'Advanced',
+        deadline: new Date('2025-01-25'),
+        sponsorId: sponsor._id,
+        requirements: [
+          'Research and validate your business idea',
+          'Create financial projections and market analysis',
+          'Develop a marketing and sales strategy',
+          'Present your business plan to a panel'
+        ],
+        tags: ['Business', 'Entrepreneurship', 'Strategy'],
+        status: 'active',
+        numberOfAwards: 2,
+        totalBudget: 4000,
+        applicants: 6,
+        approved: 1,
+        rejected: 1,
+        pending: 4
+      },
+      {
+        title: 'Mobile App Development',
+        description: 'Build a functional mobile app using React Native or Flutter.',
+        amount: 1800,
+        category: 'Programming',
+        difficulty: 'Advanced',
+        deadline: new Date('2025-03-10'),
+        sponsorId: sponsor._id,
+        requirements: [
+          'Choose a mobile app framework (React Native/Flutter)',
+          'Build a complete mobile application',
+          'Test on both iOS and Android devices',
+          'Publish to app stores or provide APK/IPA files'
+        ],
+        tags: ['Mobile Development', 'React Native', 'Flutter'],
+        status: 'active',
+        numberOfAwards: 3,
+        totalBudget: 5400,
+        applicants: 9,
+        approved: 2,
+        rejected: 1,
+        pending: 6
       }
     ];
 

@@ -7,7 +7,7 @@ const sendEmail = require('../utils/sendEmails');
 const JWT_SECRET = process.env.JWT_SECRET;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
-// 🔐 Student Signup
+//  Student Signup
 exports.registerStudent = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -36,7 +36,7 @@ exports.registerStudent = async (req, res) => {
   }
 };
 
-// 🧑‍💼 Sponsor Signup
+//  Sponsor Signup
 exports.registerSponsor = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -63,7 +63,7 @@ exports.registerSponsor = async (req, res) => {
   }
 };
 
-// 🔓 Login
+//  Login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// 🔐 Forgot Password
+//  Forgot Password
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -97,7 +97,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// 🔐 Reset Password
+//  Reset Password
 exports.resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
   try {
