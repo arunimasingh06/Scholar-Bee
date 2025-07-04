@@ -41,24 +41,34 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl flex items-center justify-center">
-              <Award className="w-6 h-6 text-white" />
+          <Link to="/" className="inline-flex items-center space-x-3 mb-6">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-12">
+                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center transform -rotate-12">
+                  <Award className="w-5 h-5 text-green-600" />
+                </div>
+              </div>
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-xs font-bold text-yellow-900">₹</span>
+              </div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-orange-400 rounded-full"></div>
+              <div className="absolute top-1 -left-1 w-2 h-2 bg-orange-300 rounded-full"></div>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              ScholarBEE
-            </span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-gray-900">ScholarBEE</span>
+              <span className="text-xs text-green-600 font-medium -mt-1">Empowering Education</span>
+            </div>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to continue your learning journey</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white/80 backdrop-blur-sm border border-green-200 rounded-2xl p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Selection */}
             <div>
@@ -71,8 +81,8 @@ const Login = () => {
                   onClick={() => setFormData(prev => ({ ...prev, role: 'student' }))}
                   className={`flex items-center justify-center space-x-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                     formData.role === 'student'
-                      ? 'border-teal-500 bg-teal-50 text-teal-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-gray-300 hover:border-green-300 text-gray-600 hover:text-green-600'
                   }`}
                 >
                   <User className="w-5 h-5" />
@@ -83,8 +93,8 @@ const Login = () => {
                   onClick={() => setFormData(prev => ({ ...prev, role: 'sponsor' }))}
                   className={`flex items-center justify-center space-x-2 p-3 rounded-lg border-2 transition-all duration-200 ${
                     formData.role === 'sponsor'
-                      ? 'border-cyan-500 bg-cyan-50 text-cyan-700'
-                      : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-gray-300 hover:border-green-300 text-gray-600 hover:text-green-600'
                   }`}
                 >
                   <Building className="w-5 h-5" />
@@ -105,7 +115,7 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200"
                 placeholder="Enter your email"
               />
             </div>
@@ -123,7 +133,7 @@ const Login = () => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200"
                   placeholder="Enter your password"
                 />
                 <button
@@ -147,14 +157,14 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
 
             {/* Forgot Password */}
             <div className="text-center">
-              <Link to="#" className="text-sm text-teal-600 hover:text-teal-800 transition-colors">
+              <Link to="#" className="text-sm text-gray-600 hover:text-purple-600 transition-colors">
                 Forgot your password?
               </Link>
             </div>
@@ -168,13 +178,13 @@ const Login = () => {
             <div className="grid grid-cols-2 gap-3">
               <Link
                 to="/student/signup"
-                className="text-center py-2 px-4 border border-teal-200 text-teal-600 rounded-lg hover:bg-teal-50 transition-all duration-200 text-sm font-medium"
+                className="text-center py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
               >
                 Sign up as Student
               </Link>
               <Link
                 to="/sponsor/signup"
-                className="text-center py-2 px-4 border border-cyan-200 text-cyan-600 rounded-lg hover:bg-cyan-50 transition-all duration-200 text-sm font-medium"
+                className="text-center py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
               >
                 Sign up as Sponsor
               </Link>

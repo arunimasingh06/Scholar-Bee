@@ -51,18 +51,27 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white/80 backdrop-blur-sm border-b border-green-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to={user ? (user.role === 'student' ? '/student/dashboard' : '/sponsor/dashboard') : '/'} 
-                  className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                <Award className="w-5 h-5 text-white" />
+                  className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-12">
+                  <div className="w-6 h-6 bg-white rounded-lg flex items-center justify-center transform -rotate-12">
+                    <Award className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
+                <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center shadow-sm">
+                  <span className="text-xs font-bold text-yellow-900">₹</span>
+                </div>
+                <div className="absolute -bottom-0.5 -left-0.5 w-2 h-2 bg-orange-400 rounded-full"></div>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                ScholarBEE
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-gray-900">ScholarBEE</span>
+                <span className="text-xs text-green-600 font-medium -mt-1">Empowering Education</span>
+              </div>
             </Link>
           </div>
 
@@ -76,8 +85,8 @@ const Navbar = () => {
                     to={item.to}
                     className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       location.pathname === item.to
-                        ? 'bg-teal-50 text-teal-700 border border-teal-200'
-                        : 'text-gray-600 hover:text-teal-600 hover:bg-gray-50'
+                        ? 'bg-green-100 text-green-700 border border-green-300'
+                        : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                     }`}
                   >
                     <item.icon className="w-4 h-4" />
@@ -94,8 +103,8 @@ const Navbar = () => {
                     to={item.to}
                     className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       location.pathname === item.to
-                        ? 'bg-teal-50 text-teal-700 border border-teal-200'
-                        : 'text-gray-600 hover:text-teal-600 hover:bg-gray-50'
+                        ? 'bg-green-100 text-green-700 border border-green-300'
+                        : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                     }`}
                   >
                     <item.icon className="w-4 h-4" />
@@ -109,7 +118,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <button className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
@@ -122,19 +131,19 @@ const Navbar = () => {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-gray-600" />
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-green-600" />
                     </div>
                   )}
                   <div className="hidden sm:block">
                     <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                    <p className="text-xs text-gray-600 capitalize">{user.role}</p>
                   </div>
                 </div>
 
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                  className="p-2 text-gray-600 hover:text-red-500 transition-colors"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
@@ -144,13 +153,13 @@ const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="text-gray-600 hover:text-teal-600 font-medium transition-colors"
+                  className="text-gray-600 hover:text-green-600 font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/student/signup"
-                  className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                   Get Started
                 </Link>
@@ -161,7 +170,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-gray-200 bg-gray-50">
+      <div className="md:hidden border-t border-green-200 bg-white/50">
         <div className="px-4 py-2 space-y-1">
           {user ? (
             getNavItems().map((item) => (
@@ -170,8 +179,8 @@ const Navbar = () => {
                 to={item.to}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   location.pathname === item.to
-                    ? 'bg-teal-100 text-teal-700'
-                    : 'text-gray-600 hover:text-teal-600 hover:bg-white'
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                 }`}
               >
                 <item.icon className="w-4 h-4" />
@@ -185,8 +194,8 @@ const Navbar = () => {
                 to={item.to}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   location.pathname === item.to
-                    ? 'bg-teal-100 text-teal-700'
-                    : 'text-gray-600 hover:text-teal-600 hover:bg-white'
+                    ? 'bg-green-100 text-green-700'
+                    : 'text-gray-600 hover:text-green-700 hover:bg-green-50'
                 }`}
               >
                 <item.icon className="w-4 h-4" />
