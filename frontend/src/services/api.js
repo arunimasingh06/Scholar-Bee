@@ -224,6 +224,45 @@ export const institutionalAPI = {
 };
 
 /**
+ * 💰 Wallet API Methods
+ */
+export const walletAPI = {
+  // Get student wallet
+  getWallet: () => apiRequest('/wallet'),
+
+  // Update UPI ID
+  updateUpiId: (upiId) => apiRequest('/wallet/upi', {
+    method: 'PUT',
+    body: JSON.stringify({ upiId }),
+  }),
+
+  // Get transaction history
+  getTransactions: (page = 1, limit = 20, type = 'all') => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(type !== 'all' && { type }),
+    });
+    return apiRequest(`/wallet/transactions?${params}`);
+  },
+
+  // Withdraw funds
+  withdrawFunds: (amount) => apiRequest('/wallet/withdraw', {
+    method: 'POST',
+    body: JSON.stringify({ amount }),
+  }),
+
+  // Get wallet statistics
+  getStats: () => apiRequest('/wallet/stats'),
+
+  // Credit wallet (for sponsors when approving applications)
+  creditWallet: (applicationId, amount, description) => apiRequest('/wallet/credit', {
+    method: 'POST',
+    body: JSON.stringify({ applicationId, amount, description }),
+  }),
+};
+
+/**
  * 🌍 Public API Methods
  */
 export const publicAPI = {
@@ -259,5 +298,6 @@ export default {
   admin: adminAPI,
   dashboard: dashboardAPI,
   institutional: institutionalAPI,
+  wallet: walletAPI,
   public: publicAPI,
 }; 

@@ -9,7 +9,7 @@ const connectToDb = require('./db/db'); // Import database connection function
 // Connect to MongoDB database
 connectToDb();
 
-// 📦 Route Imports - All API route modules
+// Route Imports - All API route modules
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -19,12 +19,13 @@ const adminRoutes = require('./routes/adminRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const institutionalRoutes = require('./routes/institutionalRoutes');
 const publicRoutes = require('./routes/publicRoute');
+const walletRoutes = require('./routes/walletRoutes');
 
-// 🔧 Middleware Configuration
+//  Middleware Configuration
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
-// 🌐 CORS Configuration - Allow frontend to communicate with backend
+//  CORS Configuration - Allow frontend to communicate with backend
 // Beginner-friendly: Allow all origins in development
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
@@ -38,7 +39,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// 🚀 API Route Mounting - Organize routes by functionality
+//  API Route Mounting - Organize routes by functionality
 app.use('/api/auth', authRoutes);                 // Authentication: Login, Register, Forgot Password
 app.use('/api/users', userRoutes);               // User Management: Profile, Change Password
 app.use('/api/students', studentRoutes);         // Student Features: Dashboard, Applications
@@ -47,9 +48,10 @@ app.use('/api/applications', applicationRoutes); // Application Management
 app.use('/api/admin', adminRoutes);              // Admin Dashboard & Management
 app.use('/api/dashboards', dashboardRoutes);     // NGO and Student Progress Dashboards
 app.use('/api/institutional', institutionalRoutes); // College and CSR Portals
+app.use('/api/wallet', walletRoutes);            // Student Wallet Management
 app.use('/api', publicRoutes);                   // Public Pages: Landing, About, Contact, Courses
 
-// 🏠 Health Check Endpoint
+//  Health Check Endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -60,7 +62,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 🚨 Global Error Handler
+//  Global Error Handler
 app.use((err, req, res, next) => {
   console.error('Global Error Handler:', err);
   res.status(500).json({ 
@@ -69,7 +71,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 📝 404 Handler for undefined routes
+//  404 Handler for undefined routes
 app.use('*', (req, res) => {
   res.status(404).json({ 
     message: 'Route not found',

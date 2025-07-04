@@ -201,20 +201,23 @@ const StudentDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Earned</p>
-                <p className="text-2xl font-bold text-green-600 flex items-center">
-                  <IndianRupee className="w-5 h-5 mr-1" />
-                  {safeStats.totalEarned.toLocaleString()}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+          <Link to="/student/wallet" className="block">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Earned</p>
+                  <p className="text-2xl font-bold text-green-600 flex items-center">
+                    <IndianRupee className="w-5 h-5 mr-1" />
+                    {safeStats.totalEarned.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1 group-hover:underline">View Wallet →</p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <TrendingUp className="w-6 h-6 text-green-600" />
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">

@@ -172,9 +172,47 @@ const ApplicationsManagement = () => {
     rejected: applications.filter(app => app.status === 'rejected').length
   };
 
-  const handleApprove = (applicationId) => {
-    // Handle approval logic
-    alert(`Application ${applicationId} approved! Payment will be processed.`);
+  const handleApprove = async (applicationId) => {
+    try {
+      // First approve the application
+      const approveResponse = await fetch(`/api/sponsors/applications/${applicationId}/approve`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!approveResponse.ok) {
+        throw new Error('Failed to approve application');
+      }
+
+      // Then credit the student's wallet
+      const creditResponse = await fetch('/api/wallet/credit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          applicationId: applicationId,
+          amount: scholarship.amount,
+          description: `Scholarship award for: ${scholarship.title}`
+        })
+      });
+
+      if (!creditResponse.ok) {
+        throw new Error('Failed to credit wallet');
+      }
+
+      alert(`Application ${applicationId} approved! ₹${scholarship.amount} has been credited to the student's wallet.`);
+      
+      // Refresh the page to show updated status
+      window.location.reload();
+    } catch (error) {
+      console.error('Error approving application:', error);
+      alert(`Failed to approve application: ${error.message}`);
+    }
   };
 
   const handleReject = (applicationId) => {

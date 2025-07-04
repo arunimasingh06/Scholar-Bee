@@ -13,7 +13,8 @@ import {
   Users,
   BookOpen,
   Info,
-  Mail
+  Mail,
+  Wallet
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -30,6 +31,7 @@ const Navbar = () => {
     if (user?.role === 'student') {
       return [
         { to: '/student/dashboard', icon: Home, label: 'Dashboard' },
+        { to: '/student/wallet', icon: Wallet, label: 'Wallet' },
         { to: '/student/applications', icon: FileText, label: 'My Applications' },
         { to: '/student/profile', icon: User, label: 'Profile' },
       ];
