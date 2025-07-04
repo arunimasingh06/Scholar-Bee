@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { sponsorAPI } from '../../services/api';
 import { 
   Award, 
   IndianRupee, 
@@ -75,12 +76,37 @@ const CreateScholarship = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Transform form data to match backend expectations
+      const scholarshipData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        amount: parseInt(formData.amount),
+        numberOfAwards: parseInt(formData.numberOfAwards),
+        totalBudget: parseInt(formData.amount) * parseInt(formData.numberOfAwards),
+        deadline: new Date(formData.deadline).toISOString(),
+        difficulty: formData.difficulty,
+        requirements: formData.requirements.split('\n').filter(req => req.trim()),
+        eligibilityCriteria: formData.eligibilityCriteria,
+        submissionGuidelines: formData.submissionGuidelines,
+        evaluationCriteria: formData.evaluationCriteria || '',
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        status: 'active'
+      };
 
-    // Show success and redirect
-    alert('Scholarship created successfully! Students can now apply.');
-    navigate('/sponsor/scholarships');
+      // Call the API to create the scholarship
+      const response = await sponsorAPI.createScholarship(scholarshipData);
+      
+      // Show success message and redirect
+      alert('Scholarship created successfully! Students can now apply.');
+      navigate('/sponsor/scholarships');
+    } catch (error) {
+      console.error('Error creating scholarship:', error);
+      alert(`Failed to create scholarship: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const totalAmount = parseInt(formData.amount || '0') * parseInt(formData.numberOfAwards || '0');

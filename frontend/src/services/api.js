@@ -137,7 +137,7 @@ export const sponsorAPI = {
   getScholarshipApplications: (scholarshipId) => apiRequest(`/sponsors/scholarships/${scholarshipId}/applications`),
 
   // Create new scholarship
-  createScholarship: (scholarshipData) => apiRequest('/sponsors/scholarships', {
+  createScholarship: (scholarshipData) => apiRequest('/sponsors/scholarships/create', {
     method: 'POST',
     body: JSON.stringify(scholarshipData),
   }),

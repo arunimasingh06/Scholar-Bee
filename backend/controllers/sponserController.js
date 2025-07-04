@@ -43,7 +43,7 @@ exports.getSponsorDashboard = async (req, res) => {
   try {
     const sponsorId = req.user.id;
 
-    // Get sponsor's scholarships
+    // Get sponsor's scholarships, sorted by most recent
     const scholarships = await Scholarship.find({ sponsorId })
       .sort({ createdAt: -1 });
 
@@ -60,7 +60,7 @@ exports.getSponsorDashboard = async (req, res) => {
     const activeScholarships = scholarships.filter(sch => sch.status === 'active').length;
     const completedScholarships = scholarships.filter(sch => sch.status === 'completed').length;
 
-    // Get recent scholarships
+    // Get recent scholarships (latest 3)
     const recentScholarships = scholarships.slice(0, 3).map(sch => ({
       id: sch._id,
       title: sch.title,
@@ -68,14 +68,20 @@ exports.getSponsorDashboard = async (req, res) => {
       applicants: sch.applicants,
       approved: sch.approved,
       deadline: sch.deadline,
-      status: sch.status
+      status: sch.status,
+      description: sch.description,
+      category: sch.category,
+      numberOfAwards: sch.numberOfAwards,
+      totalBudget: sch.totalBudget,
+      createdAt: sch.createdAt,
+      tags: sch.tags
     }));
 
     // Get recent applications
     const recentApplications = await Application.find({
       scholarshipId: { $in: scholarships.map(s => s._id) }
     })
-    .populate('studentId', 'fullname email')
+    .populate('studentId', 'fullname email gpa institution')
     .populate('scholarshipId', 'title')
     .sort({ createdAt: -1 })
     .limit(3);
