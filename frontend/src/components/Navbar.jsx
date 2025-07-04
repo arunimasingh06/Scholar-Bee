@@ -61,7 +61,7 @@ const Navbar = () => {
                 <Award className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                LearnReward
+                ScholarBEE
               </span>
             </Link>
           </div>

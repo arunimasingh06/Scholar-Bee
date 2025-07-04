@@ -30,7 +30,24 @@ exports.registerStudent = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'Student registered successfully' });
+
+    // Generate JWT token for the new student
+    const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(201).json({
+      message: 'Student registered successfully',
+      token,
+      user: {
+        id: newUser._id,
+        fullname: newUser.fullname,
+        email: newUser.email,
+        role: newUser.role,
+        institution: newUser.institution,
+        educationLevel: newUser.educationLevel,
+        gpa: newUser.gpa,
+        familyIncome: newUser.familyIncome
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Registration failed' });
   }

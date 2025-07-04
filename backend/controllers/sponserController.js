@@ -2,6 +2,7 @@ const Scholarship = require('../models/scholarshipModel');
 const Application = require('../models/applicationModel');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
+const xss = require('xss');
 
 // GET /sponsor/profile
 exports.getProfile = async (req, res) => {
@@ -203,13 +204,34 @@ exports.getScholarshipApplications = async (req, res) => {
 
 exports.createScholarship = async (req, res) => {
   try {
-    const scholarship = new Scholarship({
-      ...req.body,
+    // Sanitize input data
+    const sanitizedData = {
+      title: xss(req.body.title),
+      description: xss(req.body.description),
+      category: xss(req.body.category),
+      amount: parseInt(req.body.amount),
+      numberOfAwards: parseInt(req.body.numberOfAwards),
+      totalBudget: parseInt(req.body.totalBudget),
+      deadline: new Date(req.body.deadline),
+      difficulty: req.body.difficulty,
+      requirements: Array.isArray(req.body.requirements) 
+        ? req.body.requirements.map(req => xss(req))
+        : [],
+      eligibilityCriteria: xss(req.body.eligibilityCriteria),
+      submissionGuidelines: xss(req.body.submissionGuidelines),
+      evaluationCriteria: xss(req.body.evaluationCriteria || ''),
+      tags: Array.isArray(req.body.tags) 
+        ? req.body.tags.map(tag => xss(tag))
+        : [],
+      status: req.body.status,
       sponsorId: req.user.id
-    });
+    };
+
+    const scholarship = new Scholarship(sanitizedData);
     await scholarship.save();
     res.status(201).json({ message: 'Scholarship created', scholarship });
   } catch (err) {
+    console.error('Scholarship creation error:', err);
     res.status(500).json({ message: 'Creation failed' });
   }
 };

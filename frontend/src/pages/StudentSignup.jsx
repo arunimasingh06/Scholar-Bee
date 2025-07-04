@@ -39,14 +39,32 @@ const StudentSignup = () => {
       setError('Please fill in all required fields.');
       return false;
     }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address.');
+      return false;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
       return false;
     }
+    
+    // Password strength validation
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long.');
       return false;
     }
+    
+    // Check for at least one number and one letter
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must contain at least one letter and one number.');
+      return false;
+    }
+    
     return true;
   };
 
@@ -84,7 +102,7 @@ const StudentSignup = () => {
               <Award className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              LearnReward
+              ScholarBEE
             </span>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Join as a Student</h1>

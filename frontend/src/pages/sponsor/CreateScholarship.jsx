@@ -17,6 +17,7 @@ const CreateScholarship = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -57,7 +58,30 @@ const CreateScholarship = () => {
   };
 
   const validateStep1 = () => {
-    return formData.title && formData.description && formData.category && formData.amount && formData.numberOfAwards && formData.deadline;
+    if (!formData.title || !formData.description || !formData.category || !formData.amount || !formData.numberOfAwards || !formData.deadline) {
+      return false;
+    }
+    
+    // Validate amount range
+    const amount = parseInt(formData.amount);
+    if (amount < 500 || amount > 5000) {
+      return false;
+    }
+    
+    // Validate number of awards
+    const awards = parseInt(formData.numberOfAwards);
+    if (awards < 1 || awards > 100) {
+      return false;
+    }
+    
+    // Validate deadline is in the future
+    const deadline = new Date(formData.deadline);
+    const now = new Date();
+    if (deadline <= now) {
+      return false;
+    }
+    
+    return true;
   };
 
   const validateStep2 = () => {
@@ -65,10 +89,60 @@ const CreateScholarship = () => {
   };
 
   const handleNext = () => {
-    if (currentStep === 1 && validateStep1()) {
-      setCurrentStep(2);
-    } else if (currentStep === 2 && validateStep2()) {
-      setCurrentStep(3);
+    setValidationErrors({});
+    
+    if (currentStep === 1) {
+      const errors = {};
+      
+      if (!formData.title) errors.title = 'Title is required';
+      if (!formData.description) errors.description = 'Description is required';
+      if (!formData.category) errors.category = 'Category is required';
+      
+      if (!formData.amount) {
+        errors.amount = 'Amount is required';
+      } else {
+        const amount = parseInt(formData.amount);
+        if (amount < 500 || amount > 5000) {
+          errors.amount = 'Amount must be between ₹500 and ₹5000';
+        }
+      }
+      
+      if (!formData.numberOfAwards) {
+        errors.numberOfAwards = 'Number of awards is required';
+      } else {
+        const awards = parseInt(formData.numberOfAwards);
+        if (awards < 1 || awards > 100) {
+          errors.numberOfAwards = 'Number of awards must be between 1 and 100';
+        }
+      }
+      
+      if (!formData.deadline) {
+        errors.deadline = 'Deadline is required';
+      } else {
+        const deadline = new Date(formData.deadline);
+        const now = new Date();
+        if (deadline <= now) {
+          errors.deadline = 'Deadline must be in the future';
+        }
+      }
+      
+      if (Object.keys(errors).length === 0) {
+        setCurrentStep(2);
+      } else {
+        setValidationErrors(errors);
+      }
+    } else if (currentStep === 2) {
+      const errors = {};
+      
+      if (!formData.eligibilityCriteria) errors.eligibilityCriteria = 'Eligibility criteria is required';
+      if (!formData.requirements) errors.requirements = 'Requirements are required';
+      if (!formData.submissionGuidelines) errors.submissionGuidelines = 'Submission guidelines are required';
+      
+      if (Object.keys(errors).length === 0) {
+        setCurrentStep(3);
+      } else {
+        setValidationErrors(errors);
+      }
     }
   };
 
@@ -172,9 +246,14 @@ const CreateScholarship = () => {
                       required
                       value={formData.title}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                        validationErrors.title ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       placeholder="e.g., Complete Python Programming Course"
                     />
+                    {validationErrors.title && (
+                      <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+                    )}
                   </div>
 
                   <div className="md:col-span-2">
@@ -188,9 +267,14 @@ const CreateScholarship = () => {
                       required
                       value={formData.description}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none ${
+                        validationErrors.description ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       placeholder="Describe what students need to accomplish to earn this scholarship..."
                     />
+                    {validationErrors.description && (
+                      <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+                    )}
                   </div>
 
                   <div>
@@ -320,10 +404,10 @@ const CreateScholarship = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  disabled={!validateStep1()}
+                  disabled={!validateStep1() || isSubmitting}
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  Continue to Requirements
+                  {isSubmitting ? 'Processing...' : 'Continue to Requirements'}
                 </button>
               </div>
             )}

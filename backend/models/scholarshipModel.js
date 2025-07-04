@@ -35,6 +35,18 @@ const scholarshipSchema = new mongoose.Schema({
   requirements: [{
     type: String
   }],
+  eligibilityCriteria: {
+    type: String,
+    required: true
+  },
+  submissionGuidelines: {
+    type: String,
+    required: true
+  },
+  evaluationCriteria: {
+    type: String,
+    default: ''
+  },
   tags: [{
     type: String
   }],

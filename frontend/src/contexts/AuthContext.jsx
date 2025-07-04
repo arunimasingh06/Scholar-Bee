@@ -159,6 +159,12 @@ export const AuthProvider = ({ children }) => {
         token: response.token
       };
       
+      // Handle case where token might not be returned (fallback)
+      if (!response.token) {
+        console.warn('No token returned from registration, user will need to login');
+        return true; // Registration successful but no auto-login
+      }
+      
       // Update state and storage
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
