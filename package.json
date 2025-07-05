@@ -4,11 +4,11 @@
   "description": "ScholarBEE - Empowering students through scholarships",
   "main": "index.js",
   "scripts": {
-    "start": "./start-dev.sh",
-    "dev": "./start-dev.sh",
+    "start": "start-dev.cmd",
+    "dev": "start-dev.cmd",
     "test-connection": "node test-connection.js",
-    "setup": "echo 'Setting up ScholarBEE...' && ./start-dev.sh",
-    "backend": "cd backend && npm run dev",
+    "setup": "echo 'Setting up ScholarBEE...' && start-dev.cmd",
+    "backend": "cd backend && npm start",
     "frontend": "cd frontend && npm run dev",
     "install-all": "cd backend && npm install && cd ../frontend && npm install",
     "clean": "rm -rf backend/node_modules frontend/node_modules backend/.env frontend/.env"
