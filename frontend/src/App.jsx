@@ -15,6 +15,8 @@ import SponsorProfile from './pages/sponsor/SponsorProfile';
 import CreateScholarship from './pages/sponsor/CreateScholarship';
 import ManageScholarships from './pages/sponsor/ManageScholarships';
 import ApplicationsManagement from './pages/sponsor/ApplicationsManagement';
+import PaymentPage from './pages/sponsor/PaymentPage';
+import PaymentHistory from './pages/sponsor/PaymentHistory';
 import LandingPage from './pages/LandingPage';
 import Courses from './pages/Courses';
 import About from './pages/About';
@@ -94,6 +96,16 @@ function App() {
             <Route path="/sponsor/applications/:id" element={
               <ProtectedRoute requiredRole="sponsor">
                 <ApplicationsManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/payment/:scholarshipId" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <PaymentPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/sponsor/payments" element={
+              <ProtectedRoute requiredRole="sponsor">
+                <PaymentHistory />
               </ProtectedRoute>
             } />
             

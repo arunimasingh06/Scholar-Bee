@@ -153,6 +153,11 @@ export const sponsorAPI = {
     method: 'DELETE',
   }),
 
+  // Delete draft scholarship (unpaid)
+  deleteDraftScholarship: (scholarshipId) => apiRequest(`/sponsors/scholarships/${scholarshipId}/draft`, {
+    method: 'DELETE',
+  }),
+
   // Approve application
   approveApplication: (applicationId) => apiRequest(`/sponsors/applications/${applicationId}/approve`, {
     method: 'PATCH',
@@ -162,6 +167,12 @@ export const sponsorAPI = {
   rejectApplication: (applicationId, reason) => apiRequest(`/sponsors/applications/${applicationId}/reject`, {
     method: 'PATCH',
     body: JSON.stringify({ reason }),
+  }),
+
+  // Decide on application (approve/reject)
+  decideApplication: (applicationId, decision) => apiRequest(`/sponsors/applications/${applicationId}/decision`, {
+    method: 'PATCH',
+    body: JSON.stringify(decision),
   }),
 };
 
@@ -263,6 +274,39 @@ export const walletAPI = {
 };
 
 /**
+ * 💳 Payment API Methods
+ */
+export const paymentAPI = {
+  // Create payment for scholarship
+  createPayment: (scholarshipId, paymentMethod, paymentDetails) => 
+    apiRequest('/payments/create', {
+      method: 'POST',
+      body: JSON.stringify({ scholarshipId, paymentMethod, paymentDetails }),
+    }),
+
+  // Get payment status
+  getPaymentStatus: (paymentId) => apiRequest(`/payments/status/${paymentId}`),
+
+  // Get sponsor's payment history
+  getPaymentHistory: (page = 1, limit = 10, status = 'all') => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status !== 'all' && { status }),
+    });
+    return apiRequest(`/payments/history?${params}`);
+  },
+
+  // Process payment (simulate payment gateway)
+  processPayment: (paymentId) => apiRequest(`/payments/process/${paymentId}`, {
+    method: 'POST',
+  }),
+
+  // Get payment statistics
+  getPaymentStats: () => apiRequest('/payments/stats'),
+};
+
+/**
  * 🌍 Public API Methods
  */
 export const publicAPI = {
@@ -277,6 +321,12 @@ export const publicAPI = {
 
   // Get courses data
   getCoursesData: () => apiRequest('/courses'),
+
+  // Get available scholarships (public endpoint)
+  getAvailableScholarships: (params = {}) => {
+    const queryParams = new URLSearchParams(params).toString();
+    return apiRequest(`/scholarships?${queryParams}`);
+  },
 
   // Submit contact form
   submitContact: (contactData) => apiRequest('/contact', {
@@ -299,5 +349,6 @@ export default {
   dashboard: dashboardAPI,
   institutional: institutionalAPI,
   wallet: walletAPI,
+  payment: paymentAPI,
   public: publicAPI,
 }; 

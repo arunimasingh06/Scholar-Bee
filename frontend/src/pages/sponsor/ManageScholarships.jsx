@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { sponsorAPI } from '../../services/api';
 import { 
   Award,
   PlusCircle,
@@ -15,102 +16,56 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  CreditCard,
+  Trash2,
+  Loader
 } from 'lucide-react';
 
 const ManageScholarships = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [scholarships, setScholarships] = useState([]);
+  const [deletingDraft, setDeletingDraft] = useState(null);
 
-  // Mock scholarships data
-  const scholarships = [
-    {
-      id: 1,
-      title: 'Complete Python Programming Course',
-      description: 'Complete a comprehensive Python programming course and submit your final project.',
-      category: 'Programming',
-      amount: 1000,
-      numberOfAwards: 5,
-      totalBudget: 5000,
-      deadline: '2025-02-15',
-      createdDate: '2025-01-10',
-      status: 'active',
-      applicants: 23,
-      approved: 3,
-      rejected: 2,
-      pending: 18,
-      tags: ['Python', 'Programming', 'Beginner']
-    },
-    {
-      id: 2,
-      title: 'Community Leadership Project',
-      description: 'Lead a community service project that benefits at least 50 people in your local area.',
-      category: 'Social Impact',
-      amount: 750,
-      numberOfAwards: 8,
-      totalBudget: 6000,
-      deadline: '2025-02-28',
-      createdDate: '2025-01-08',
-      status: 'active',
-      applicants: 15,
-      approved: 2,
-      rejected: 1,
-      pending: 12,
-      tags: ['Community', 'Leadership', 'Social Impact']
-    },
-    {
-      id: 3,
-      title: 'Data Science Certification',
-      description: 'Complete a recognized data science certification and submit a capstone project.',
-      category: 'Data Science',
-      amount: 1200,
-      numberOfAwards: 3,
-      totalBudget: 3600,
-      deadline: '2025-01-30',
-      createdDate: '2024-12-15',
-      status: 'completed',
-      applicants: 8,
-      approved: 3,
-      rejected: 2,
-      pending: 0,
-      tags: ['Data Science', 'Analytics', 'Certification']
-    },
-    {
-      id: 4,
-      title: 'Digital Marketing Campaign',
-      description: 'Create and execute a digital marketing campaign for a local business or NGO.',
-      category: 'Marketing',
-      amount: 800,
-      numberOfAwards: 6,
-      totalBudget: 4800,
-      deadline: '2025-02-20',
-      createdDate: '2025-01-05',
-      status: 'active',
-      applicants: 34,
-      approved: 1,
-      rejected: 3,
-      pending: 30,
-      tags: ['Marketing', 'Digital', 'Campaign']
-    },
-    {
-      id: 5,
-      title: 'Environmental Awareness Initiative',
-      description: 'Organize an environmental awareness program in your community.',
-      category: 'Social Impact',
-      amount: 600,
-      numberOfAwards: 10,
-      totalBudget: 6000,
-      deadline: '2025-01-25',
-      createdDate: '2024-12-20',
-      status: 'closed',
-      applicants: 12,
-      approved: 5,
-      rejected: 4,
-      pending: 0,
-      tags: ['Environment', 'Community', 'Awareness']
+  useEffect(() => {
+    fetchScholarships();
+  }, []);
+
+  const fetchScholarships = async () => {
+    try {
+      setLoading(true);
+      const response = await sponsorAPI.getScholarships();
+      setScholarships(response.scholarships || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching scholarships:', err);
+      setError('Failed to load scholarships');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleDeleteDraft = async (scholarshipId) => {
+    if (!window.confirm('Are you sure you want to delete this draft scholarship? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setDeletingDraft(scholarshipId);
+      await sponsorAPI.deleteDraftScholarship(scholarshipId);
+      setScholarships(prev => prev.filter(s => s.id !== scholarshipId));
+      alert('Draft scholarship deleted successfully');
+    } catch (err) {
+      console.error('Error deleting draft scholarship:', err);
+      alert('Failed to delete draft scholarship');
+    } finally {
+      setDeletingDraft(null);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -155,6 +110,37 @@ const ManageScholarships = () => {
     const days = Math.ceil((new Date(deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
     return days;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={fetchScholarships}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -376,19 +362,58 @@ const ManageScholarships = () => {
                   </div>
                 </div>
 
+                {/* Payment Status */}
+                {scholarship.status === 'draft' && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-600" />
+                        <span className="text-sm font-medium text-yellow-800">Payment Required</span>
+                      </div>
+                      <span className="text-sm text-yellow-700">₹{scholarship.totalBudget.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Link
-                    to={`/sponsor/applications/${scholarship.id}`}
-                    className="flex-1 bg-purple-50 text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-purple-100 transition-colors text-center flex items-center justify-center space-x-1"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>View Applications</span>
-                  </Link>
-                  <button className="flex-1 bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1">
-                    <Edit3 className="w-4 h-4" />
-                    <span>Edit</span>
-                  </button>
+                  {scholarship.status === 'draft' ? (
+                    <>
+                      <Link
+                        to={`/sponsor/payment/${scholarship.id}`}
+                        className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors text-center flex items-center justify-center space-x-1"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Pay Now</span>
+                      </Link>
+                      <button 
+                        onClick={() => handleDeleteDraft(scholarship.id)}
+                        disabled={deletingDraft === scholarship.id}
+                        className="flex-1 bg-red-50 text-red-700 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors flex items-center justify-center space-x-1 disabled:opacity-50"
+                      >
+                        {deletingDraft === scholarship.id ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                        <span>Delete</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to={`/sponsor/applications/${scholarship.id}`}
+                        className="flex-1 bg-purple-50 text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-purple-100 transition-colors text-center flex items-center justify-center space-x-1"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>View Applications</span>
+                      </Link>
+                      <button className="flex-1 bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1">
+                        <Edit3 className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

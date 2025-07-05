@@ -25,8 +25,10 @@ router.post(
   ],
   sponsorController.createScholarship
 );
-router.put('/scholarships/:id', verifyToken, requireRole('sponsor'), sponsorController.updateScholarship);
+router.delete('/scholarships/:id/draft', verifyToken, requireRole('sponsor'), sponsorController.deleteDraftScholarship);
 router.patch('/scholarships/:id/close', verifyToken, requireRole('sponsor'), sponsorController.closeScholarship);
+router.put('/scholarships/:id', verifyToken, requireRole('sponsor'), sponsorController.updateScholarship);
+router.get('/scholarships/:id', verifyToken, requireRole('sponsor'), sponsorController.getScholarshipById);
 
 // Application routes
 router.get('/scholarships/:scholarshipId/applications', verifyToken, requireRole('sponsor'), sponsorController.getScholarshipApplications);

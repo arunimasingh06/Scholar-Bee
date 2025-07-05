@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { studentAPI } from '../../services/api';
 import { 
   FileText, 
   Clock, 
@@ -15,70 +16,24 @@ import {
 } from 'lucide-react';
 
 const StudentApplications = () => {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock applications data
-  const applications = [
-    {
-      id: 1,
-      scholarshipTitle: 'Complete Python Programming Course',
-      amount: 1000,
-      appliedDate: '2025-01-20',
-      deadline: '2025-02-15',
-      status: 'pending',
-      category: 'Programming',
-      description: 'Complete a comprehensive Python programming course and submit your final project.',
-      reviewNotes: null
-    },
-    {
-      id: 2,
-      scholarshipTitle: 'Community Service Leadership Project',
-      amount: 750,
-      appliedDate: '2025-01-18',
-      deadline: '2025-02-28',
-      status: 'approved',
-      category: 'Social Impact',
-      description: 'Lead a community service project that benefits at least 50 people.',
-      reviewNotes: 'Excellent project proposal. Looking forward to seeing the implementation.',
-      paymentDate: '2025-01-25'
-    },
-    {
-      id: 3,
-      scholarshipTitle: 'Data Science Fundamentals Certification',
-      amount: 1200,
-      appliedDate: '2025-01-15',
-      deadline: '2025-01-30',
-      status: 'rejected',
-      category: 'Data Science',
-      description: 'Obtain a recognized data science certification and complete a capstone project.',
-      reviewNotes: 'Application was well-written, but the project scope was too narrow. Please consider reapplying with a more comprehensive approach.'
-    },
-    {
-      id: 4,
-      scholarshipTitle: 'Digital Marketing Campaign',
-      amount: 800,
-      appliedDate: '2025-01-22',
-      deadline: '2025-02-20',
-      status: 'in_review',
-      category: 'Marketing',
-      description: 'Create and execute a digital marketing campaign for a local business or NGO.',
-      reviewNotes: null
-    },
-    {
-      id: 5,
-      scholarshipTitle: 'Mobile App Development Project',
-      amount: 1500,
-      appliedDate: '2025-01-10',
-      deadline: '2025-01-25',
-      status: 'completed',
-      category: 'Development',
-      description: 'Develop and publish a mobile application addressing a real-world problem.',
-      reviewNotes: 'Outstanding work! The app has great potential for social impact.',
-      paymentDate: '2025-01-28',
-      completionDate: '2025-01-24'
+  useEffect(() => {
+    async function fetchApplications() {
+      setLoading(true);
+      try {
+        const res = await studentAPI.getApplications();
+        setApplications(res.applications || []);
+      } catch (err) {
+        setApplications([]);
+      }
+      setLoading(false);
     }
-  ];
+    fetchApplications();
+  }, []);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -112,8 +67,8 @@ const StudentApplications = () => {
 
   const filteredApplication = applications.filter(app => {
     const matchesStatus = filterStatus === 'all' || app.status === filterStatus;
-    const matchesSearch = app.scholarshipTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (app.scholarshipTitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (app.category || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -123,8 +78,19 @@ const StudentApplications = () => {
     approved: applications.filter(app => app.status === 'approved' || app.status === 'completed').length,
     totalEarned: applications
       .filter(app => app.status === 'approved' || app.status === 'completed')
-      .reduce((sum, app) => sum + app.amount, 0)
+      .reduce((sum, app) => sum + (app.amount || 0), 0)
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Clock className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

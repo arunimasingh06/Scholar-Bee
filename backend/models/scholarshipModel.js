@@ -53,7 +53,12 @@ const scholarshipSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['active', 'inactive', 'completed', 'draft'],
-    default: 'active'
+    default: 'draft'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed'],
+    default: 'pending'
   },
   numberOfAwards: {
     type: Number,

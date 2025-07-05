@@ -74,7 +74,7 @@ const walletSchema = new mongoose.Schema({
 });
 
 // Index for better query performance
-walletSchema.index({ studentId: 1 });
+
 walletSchema.index({ 'transactions.createdAt': -1 });
 
 module.exports = mongoose.model('Wallet', walletSchema); 

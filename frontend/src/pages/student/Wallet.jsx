@@ -44,7 +44,7 @@ const Wallet = () => {
     try {
       const response = await fetch('/api/wallet', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       const data = await response.json();
@@ -67,7 +67,7 @@ const Wallet = () => {
 
       const response = await fetch(`/api/wallet/transactions?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       const data = await response.json();
@@ -86,7 +86,7 @@ const Wallet = () => {
     try {
       const response = await fetch('/api/wallet/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       const data = await response.json();
@@ -114,7 +114,7 @@ const Wallet = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({ amount: parseFloat(withdrawAmount) })
       });
@@ -146,7 +146,7 @@ const Wallet = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({ upiId })
       });

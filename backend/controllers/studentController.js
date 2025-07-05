@@ -41,28 +41,44 @@ exports.getApplications = async (req, res) => {
  * Allows students to submit new scholarship applications
  * @param {Object} req - Express request object
  * @param {Object} req.params - Contains scholarshipId
- * @param {Object} req.body - Contains essayText and documents
+ * @param {Object} req.body - Contains essay, motivation, projectPlan, timeline, documents, and amount
  * @param {Object} res - Express response object
  */
 exports.applyScholarship = async (req, res) => {
   const { scholarshipId } = req.params;
-  const { essayText, documents } = req.body;
-  
+  const { essay, motivation, projectPlan, timeline, documents, amount } = req.body;
+
   try {
-    // Create new application instance
-    const application = new Application({
+    const scholarship = await Scholarship.findById(scholarshipId);
+    if (!scholarship || scholarship.status !== 'active') {
+      return res.status(400).json({ message: 'Invalid or inactive scholarship' });
+    }
+
+    const existing = await Application.findOne({
       scholarshipId,
-      studentId: req.user.id, // Get student ID from authenticated user
-      essayText,
-      documents
+      studentId: req.user.id
     });
-    
-    // Save application to database
-    await application.save();
+
+    if (existing) {
+      return res.status(409).json({ message: 'You already applied for this scholarship' });
+    }
+
+    const newApp = new Application({
+      scholarshipId,
+      studentId: req.user.id,
+      essay,
+      motivation,
+      projectPlan,
+      timeline,
+      documents: documents || [],
+      amount: amount || scholarship.amount
+    });
+
+    await newApp.save();
     res.status(201).json({ message: 'Application submitted successfully' });
   } catch (err) {
-    console.error('❌ Application submission error:', err);
-    res.status(500).json({ message: 'Application submission failed' });
+    console.error('Application submission error:', err);
+    res.status(500).json({ message: 'Submission failed', error: err.message });
   }
 };
 

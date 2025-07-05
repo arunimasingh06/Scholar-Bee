@@ -29,75 +29,7 @@ const StudentDashboard = () => {
       pendingApplications: 0,
       currentStreak: 0
     },
-    scholarships: [
-      // Mock data as fallback
-      {
-        id: 'mock-1',
-        title: 'AI & Machine Learning Innovation',
-        description: 'Develop an AI-powered solution that solves a real-world problem. Use machine learning algorithms to create innovative applications.',
-        amount: 2500,
-        category: 'Programming',
-        difficulty: 'Advanced',
-        deadline: new Date('2025-03-20'),
-        applicants: 15,
-        tags: ['AI', 'Machine Learning', 'Innovation']
-      },
-      {
-        id: 'mock-2',
-        title: 'Environmental Sustainability Project',
-        description: 'Create a project that promotes environmental conservation. Focus on renewable energy, waste reduction, or climate action.',
-        amount: 1800,
-        category: 'Social Impact',
-        difficulty: 'Intermediate',
-        deadline: new Date('2025-04-10'),
-        applicants: 22,
-        tags: ['Environment', 'Sustainability', 'Green Tech']
-      },
-      {
-        id: 'mock-3',
-        title: 'Creative Writing & Storytelling',
-        description: 'Write a compelling short story or novel chapter. Showcase your creative writing skills and storytelling abilities.',
-        amount: 900,
-        category: 'Arts',
-        difficulty: 'Beginner',
-        deadline: new Date('2025-02-25'),
-        applicants: 28,
-        tags: ['Creative Writing', 'Storytelling', 'Literature']
-      },
-      {
-        id: 'mock-4',
-        title: 'Blockchain Development Challenge',
-        description: 'Build a decentralized application (DApp) using blockchain technology. Explore smart contracts and Web3 development.',
-        amount: 3000,
-        category: 'Programming',
-        difficulty: 'Advanced',
-        deadline: new Date('2025-04-05'),
-        applicants: 8,
-        tags: ['Blockchain', 'Web3', 'Smart Contracts']
-      },
-      {
-        id: 'mock-5',
-        title: 'Mental Health Awareness Campaign',
-        description: 'Design and execute a campaign that raises awareness about mental health issues among students and young adults.',
-        amount: 1200,
-        category: 'Social Impact',
-        difficulty: 'Intermediate',
-        deadline: new Date('2025-03-15'),
-        applicants: 19,
-        tags: ['Mental Health', 'Awareness', 'Wellness']
-      },
-      {
-        id: 'mock-6',
-        title: 'Game Development Showcase',
-        description: 'Create an original video game or interactive experience. Use any game engine or programming language of your choice.',
-        amount: 2200,
-        category: 'Programming',
-        difficulty: 'Intermediate',
-        deadline: new Date('2025-04-01'),
-        applicants: 14,
-        tags: ['Game Development', 'Interactive', 'Creative']
-      }
-    ],
+    scholarships: [],
     recentActivities: []
   });
 
@@ -105,17 +37,38 @@ const StudentDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  // Filter scholarships when search or category changes
+  useEffect(() => {
+    // Only filter if we have initial data and search/category changes
+    if (dashboardData.scholarships.length > 0) {
+      // Filter scholarships based on search and category
+      const filteredScholarships = dashboardData.scholarships.filter(scholarship => {
+        const matchesSearch = !searchTerm || 
+          scholarship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          scholarship.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || scholarship.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
+
+      setDashboardData(prev => ({
+        ...prev,
+        scholarships: filteredScholarships
+      }));
+    }
+  }, [searchTerm, selectedCategory, dashboardData.scholarships.length]);
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const data = await studentAPI.getDashboard();
-      setDashboardData(data);
+      
+      // Fetch dashboard stats, recent activities, and scholarships
+      const dashboardData = await studentAPI.getDashboard();
+      
+      setDashboardData(dashboardData);
       setError(null);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      // Use mock data as fallback instead of showing error
-      console.log('Using mock data as fallback');
-      setError(null);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -288,10 +241,8 @@ const StudentDashboard = () => {
                       <option value="all">All Categories</option>
                       <option value="Programming">Programming</option>
                       <option value="Data Science">Data Science</option>
-                      <option value="Marketing">Marketing</option>
+                      <option value="Web Development">Web Development</option>
                       <option value="Social Impact">Social Impact</option>
-                      <option value="Design">Design</option>
-                      <option value="Business">Business</option>
                     </select>
                   </div>
                 </div>

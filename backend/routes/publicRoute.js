@@ -8,4 +8,7 @@ router.get('/courses', publicController.getCourses);
 router.get('/about', publicController.getAbout);
 router.get('/contact', publicController.getContact);
 
+// Available scholarships for students
+router.get('/scholarships', publicController.getAvailableScholarships);
+
 module.exports = router;

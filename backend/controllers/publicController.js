@@ -91,3 +91,83 @@ exports.getContact = async (req, res) => {
     res.status(500).json({ message: 'Error fetching contact data' });
   }
 };
+
+// Get available scholarships for students
+exports.getAvailableScholarships = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, category, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Build filter query - show active scholarships (same as student dashboard)
+    const andConditions = [
+      { status: 'active' }
+    ];
+
+    if (category && category !== 'all') {
+      andConditions.push({ category });
+    }
+    if (search) {
+      andConditions.push({
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { tags: { $in: [new RegExp(search, 'i')] } }
+        ]
+      });
+    }
+
+    const filter = { $and: andConditions };
+
+    // Get scholarships with pagination
+    const scholarships = await Scholarship.find(filter)
+      .select('title description amount category difficulty deadline tags numberOfAwards totalBudget status paymentStatus')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get total count for pagination
+    const total = await Scholarship.countDocuments(filter);
+
+    // Get applicant count for each scholarship
+    const scholarshipsWithApplicants = await Promise.all(
+      scholarships.map(async (scholarship) => {
+        const applicantCount = await Application.countDocuments({ 
+          scholarshipId: scholarship._id 
+        });
+        return {
+          id: scholarship._id,
+          title: scholarship.title,
+          description: scholarship.description,
+          amount: scholarship.amount,
+          category: scholarship.category,
+          difficulty: scholarship.difficulty,
+          deadline: scholarship.deadline,
+          tags: scholarship.tags,
+          numberOfAwards: scholarship.numberOfAwards,
+          totalBudget: scholarship.totalBudget,
+          status: scholarship.status,
+          paymentStatus: scholarship.paymentStatus,
+          applicants: applicantCount
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      scholarships: scholarshipsWithApplicants,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        total,
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching available scholarships:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching available scholarships' 
+    });
+  }
+};

@@ -166,15 +166,24 @@ const CreateScholarship = () => {
         submissionGuidelines: formData.submissionGuidelines,
         evaluationCriteria: formData.evaluationCriteria || '',
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-        status: 'active'
+        status: 'draft'
       };
 
-      // Call the API to create the scholarship
+      // Call the API to create the scholarship draft
       const response = await sponsorAPI.createScholarship(scholarshipData);
       
-      // Show success message and redirect
-      alert('Scholarship created successfully! Students can now apply.');
-      navigate('/sponsor/scholarships');
+      // Show success message and redirect to payment
+      alert('Scholarship draft created! Please complete payment to activate your scholarship.');
+      
+      // Handle different response structures
+      const scholarshipId = response.scholarship?.id || response.scholarship?._id || response._id || response.id;
+      if (scholarshipId) {
+        navigate(`/sponsor/payment/${scholarshipId}`);
+      } else {
+        console.error('No scholarship ID in response:', response);
+        alert('Scholarship draft created but could not redirect to payment. Please try again.');
+        navigate('/sponsor/scholarships');
+      }
     } catch (error) {
       console.error('Error creating scholarship:', error);
       alert(`Failed to create scholarship: ${error.message}`);

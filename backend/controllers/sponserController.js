@@ -145,6 +145,52 @@ exports.getSponsorScholarships = async (req, res) => {
   }
 };
 
+// Get a single scholarship by ID
+exports.getScholarshipById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sponsorId = req.user.id;
+// debug
+    // Verify the scholarship belongs to the sponsor
+    const scholarship = await Scholarship.findOne({ _id: id, sponsorId });
+    if (!scholarship) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Scholarship not found. It may not exist or does not belong to you.' 
+      });
+    }
+
+    res.json({
+      success: true,
+      scholarship: {
+        id: scholarship._id,
+        title: scholarship.title,
+        description: scholarship.description,
+        category: scholarship.category,
+        amount: scholarship.amount,
+        numberOfAwards: scholarship.numberOfAwards,
+        totalBudget: scholarship.totalBudget,
+        deadline: scholarship.deadline,
+        status: scholarship.status,
+        paymentStatus: scholarship.paymentStatus,
+        difficulty: scholarship.difficulty,
+        requirements: scholarship.requirements,
+        eligibilityCriteria: scholarship.eligibilityCriteria,
+        submissionGuidelines: scholarship.submissionGuidelines,
+        evaluationCriteria: scholarship.evaluationCriteria,
+        tags: scholarship.tags,
+        createdAt: scholarship.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching scholarship:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching scholarship' 
+    });
+  }
+};
+
 // Get applications for a specific scholarship
 exports.getScholarshipApplications = async (req, res) => {
   try {
@@ -223,13 +269,27 @@ exports.createScholarship = async (req, res) => {
       tags: Array.isArray(req.body.tags) 
         ? req.body.tags.map(tag => xss(tag))
         : [],
-      status: req.body.status,
+      status: 'draft', // Always start as draft
+      paymentStatus: 'pending', // Payment is required
       sponsorId: req.user.id
     };
 
+    // Create scholarship as draft (not yet active)
     const scholarship = new Scholarship(sanitizedData);
     await scholarship.save();
-    res.status(201).json({ message: 'Scholarship created', scholarship });
+    
+    res.status(201).json({ 
+      message: 'Scholarship draft created. Payment required to activate.',
+      scholarship: {
+        id: scholarship._id,
+        title: scholarship.title,
+        amount: scholarship.amount,
+        numberOfAwards: scholarship.numberOfAwards,
+        totalBudget: scholarship.totalBudget,
+        status: scholarship.status,
+        paymentStatus: scholarship.paymentStatus
+      }
+    });
   } catch (err) {
     console.error('Scholarship creation error:', err);
     res.status(500).json({ message: 'Creation failed' });
@@ -301,5 +361,42 @@ exports.decideApplication = async (req, res) => {
     res.json({ message: `Application ${status}`, application: app });
   } catch (err) {
     res.status(500).json({ message: 'Failed to update application status' });
+  }
+};
+
+// Delete unpaid draft scholarship
+exports.deleteDraftScholarship = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sponsorId = req.user.id;
+
+    // Find the scholarship and verify it belongs to the sponsor
+    const scholarship = await Scholarship.findOne({ 
+      _id: id, 
+      sponsorId,
+      status: 'draft',
+      paymentStatus: 'pending'
+    });
+
+    if (!scholarship) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Draft scholarship not found or cannot be deleted' 
+      });
+    }
+
+    // Delete the scholarship
+    await Scholarship.findByIdAndDelete(id);
+
+    res.json({ 
+      success: true,
+      message: 'Draft scholarship deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Error deleting draft scholarship:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error deleting draft scholarship' 
+    });
   }
 };

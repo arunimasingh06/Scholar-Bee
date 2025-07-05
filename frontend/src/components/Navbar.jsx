@@ -14,7 +14,8 @@ import {
   BookOpen,
   Info,
   Mail,
-  Wallet
+  Wallet,
+  CreditCard
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -40,6 +41,7 @@ const Navbar = () => {
         { to: '/sponsor/dashboard', icon: Home, label: 'Dashboard' },
         { to: '/sponsor/create', icon: PlusCircle, label: 'Create Scholarship' },
         { to: '/sponsor/scholarships', icon: Award, label: 'My Scholarships' },
+        { to: '/sponsor/payments', icon: CreditCard, label: 'Payments' },
         { to: '/sponsor/profile', icon: Settings, label: 'Profile' },
       ];
     }

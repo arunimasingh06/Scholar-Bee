@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { publicAPI, studentAPI } from '../../services/api';
 import { 
   Award, 
   Upload, 
@@ -9,13 +10,16 @@ import {
   IndianRupee, 
   Calendar,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
 
 const ScholarshipApplication = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [scholarship, setScholarship] = useState(null);
   const [formData, setFormData] = useState({
     essay: '',
     motivation: '',
@@ -24,28 +28,55 @@ const ScholarshipApplication = () => {
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
-  // Mock scholarship data - in real app, fetch based on ID
-  const scholarship = {
-    id: 1,
-    title: 'Complete Python Programming Course',
-    amount: 1000,
-    deadline: '2025-02-15',
-    category: 'Programming',
-    difficulty: 'Beginner',
-    description: 'Complete a comprehensive Python programming course and submit your final project. This scholarship aims to encourage students to develop strong programming fundamentals.',
-    requirements: [
-      'Complete at least 40 hours of Python programming coursework',
-      'Submit a final project demonstrating core Python concepts',
-      'Provide certificates or proof of course completion',
-      'Write a 500-word essay on what you learned'
-    ],
-    submissionGuidelines: [
-      'All documents must be in PDF format',
-      'Project code should be submitted via GitHub repository',
-      'Essay must be original and plagiarism-free',
-      'Submissions after deadline will not be considered'
-    ]
-  };
+  useEffect(() => {
+    async function fetchScholarship() {
+      try {
+        setLoading(true);
+        console.log('🔍 Looking for scholarship with ID:', id);
+        // Fetch scholarship details from the public API
+        const response = await publicAPI.getAvailableScholarships();
+        console.log('📋 Available scholarships:', response.scholarships.map(s => ({ id: s.id, title: s.title })));
+        const foundScholarship = response.scholarships.find(s => s.id === id);
+        console.log('✅ Found scholarship:', foundScholarship);
+        if (foundScholarship) {
+          setScholarship({
+            id: foundScholarship.id,
+            title: foundScholarship.title,
+            amount: foundScholarship.amount,
+            deadline: foundScholarship.deadline,
+            category: foundScholarship.category,
+            difficulty: foundScholarship.difficulty || 'Beginner',
+            description: foundScholarship.description,
+            requirements: [
+              'Complete the required coursework',
+              'Submit a final project',
+              'Provide proof of completion',
+              'Write a detailed essay'
+            ],
+            submissionGuidelines: [
+              'All documents must be in PDF format',
+              'Project must be original work',
+              'Essay must be plagiarism-free',
+              'Submit before the deadline'
+            ]
+          });
+        } else {
+          alert('Scholarship not found');
+          navigate('/student/dashboard');
+        }
+      } catch (error) {
+        console.error('Error fetching scholarship:', error);
+        alert('Failed to load scholarship details');
+        navigate('/student/dashboard');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    if (id) {
+      fetchScholarship();
+    }
+  }, [id, navigate]);
 
   const handleInputChange = (e) => {
     setFormData(prev => ({
@@ -70,13 +101,58 @@ const ScholarshipApplication = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Prepare application data
+      const applicationData = {
+        essay: formData.essay,
+        motivation: formData.motivation || formData.essay, // Use essay as motivation if not provided
+        projectPlan: formData.projectPlan,
+        timeline: formData.timeline,
+        documents: uploadedFiles,
+        amount: scholarship.amount
+      };
 
-    // Show success and redirect
-    alert('Application submitted successfully! You will receive a confirmation email shortly.');
-    navigate('/student/applications');
+      console.log('📤 Submitting application data:', applicationData);
+      console.log('🎯 Scholarship ID:', scholarship.id);
+
+      // Submit application to backend using studentAPI
+      await studentAPI.applyForScholarship(scholarship.id, applicationData);
+
+      // Show success and redirect
+      alert('Application submitted successfully! You will receive a confirmation email shortly.');
+      navigate('/student/applications');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!scholarship) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600">Scholarship not found</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const daysUntilDeadline = Math.ceil(
     (new Date(scholarship.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)

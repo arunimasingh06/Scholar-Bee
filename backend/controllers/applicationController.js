@@ -4,12 +4,18 @@ const Scholarship = require('../models/scholarshipModel');
 //  Submit new application
 exports.submitApplication = async (req, res) => {
   const { scholarshipId } = req.params;
-  const { essayText, documents } = req.body;
+  const { essay, motivation, projectPlan, timeline, documents, amount } = req.body;
 
   try {
     const scholarship = await Scholarship.findById(scholarshipId);
-    if (!scholarship || scholarship.status === 'closed') {
-      return res.status(400).json({ message: 'Invalid or closed scholarship' });
+    console.log('Scholarship found:', scholarship);
+    console.log('Application submission payload:', {
+      scholarshipId,
+      studentId: req.user.id,
+      essay, motivation, projectPlan, timeline, documents, amount
+    });
+    if (!scholarship || scholarship.status !== 'active') {
+      return res.status(400).json({ message: 'Invalid or inactive scholarship' });
     }
 
     const existing = await Application.findOne({
@@ -24,13 +30,18 @@ exports.submitApplication = async (req, res) => {
     const newApp = new Application({
       scholarshipId,
       studentId: req.user.id,
-      essayText,
-      documents
+      essay,
+      motivation,
+      projectPlan,
+      timeline,
+      documents: documents || [],
+      amount: amount || scholarship.amount
     });
 
     await newApp.save();
     res.status(201).json({ message: 'Application submitted successfully' });
   } catch (err) {
+    console.error('Application submission error:', err);
     res.status(500).json({ message: 'Submission failed', error: err.message });
   }
 };

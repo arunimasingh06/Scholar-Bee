@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { sponsorAPI } from '../../services/api';
 import { 
   ArrowLeft,
   User,
@@ -16,121 +17,44 @@ import {
   Mail,
   Phone,
   GraduationCap,
-  MapPin
+  MapPin,
+  Loader,
+  AlertCircle
 } from 'lucide-react';
 
 const ApplicationsManagement = () => {
   const { id } = useParams();
   const [selectedTab, setSelectedTab] = useState('all');
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [scholarship, setScholarship] = useState(null);
+  const [applications, setApplications] = useState([]);
 
-  // Mock scholarship data
-  const scholarship = {
-    id: 1,
-    title: 'Complete Python Programming Course',
-    amount: 1000,
-    numberOfAwards: 5,
-    deadline: '2025-02-15',
-    description: 'Complete a comprehensive Python programming course and submit your final project.',
-    requirements: [
-      'Complete at least 40 hours of Python programming coursework',
-      'Submit a final project demonstrating core Python concepts',
-      'Provide certificates or proof of course completion',
-      'Write a 500-word essay on what you learned'
-    ]
-  };
+  // Fetch scholarship and applications data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch scholarship details and applications
+        const response = await sponsorAPI.getScholarshipApplications(id);
+        
+        setScholarship(response.scholarship);
+        setApplications(response.applications);
+      } catch (err) {
+        console.error('Error fetching applications:', err);
+        setError('Failed to load applications');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Mock applications data
-  const applications = [
-    {
-      id: 1,
-      student: {
-        name: 'Priya Sharma',
-        email: 'priya.sharma@email.com',
-        phone: '+91 9876543210',
-        profileImage: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        institution: 'IIT Delhi',
-        course: 'Computer Science',
-        year: '3rd Year',
-        gpa: '8.7 CGPA',
-        city: 'Delhi'
-      },
-      appliedDate: '2025-01-22',
-      status: 'pending',
-      essay: 'I am passionate about learning Python programming because it opens up countless opportunities in software development, data science, and automation. Through this scholarship, I aim to build a strong foundation in Python that will help me contribute to open-source projects and eventually develop applications that solve real-world problems in my community.',
-      projectPlan: 'I plan to create a web-based expense tracker application using Python Flask framework. The project will include user authentication, expense categorization, budget tracking, and visual reports using charts. This will demonstrate my understanding of Python basics, web development, database integration, and UI/UX design.',
-      timeline: 'Week 1-2: Python basics and syntax, Week 3-4: Data structures and algorithms, Week 5-6: Web development with Flask, Week 7-8: Final project development and testing.',
-      documents: ['Python_Basics_Certificate.pdf', 'Previous_Projects_Portfolio.pdf', 'Academic_Transcript.pdf'],
-      submittedAt: '2025-01-22T10:30:00Z'
-    },
-    {
-      id: 2,
-      student: {
-        name: 'Rahul Kumar',
-        email: 'rahul.kumar@email.com',
-        phone: '+91 9876543211',
-        profileImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        institution: 'Delhi University',
-        course: 'Information Technology',
-        year: '2nd Year',
-        gpa: '9.1 CGPA',
-        city: 'Delhi'
-      },
-      appliedDate: '2025-01-21',
-      status: 'approved',
-      essay: 'Python has become essential in today\'s technology landscape. I want to master it to pursue a career in machine learning and artificial intelligence. This scholarship will enable me to access quality courses and dedicate time to learning without financial stress.',
-      projectPlan: 'I will develop a machine learning model for predicting crop yields based on weather data. The project will use Python libraries like pandas, scikit-learn, and matplotlib to analyze agricultural data and provide insights to farmers.',
-      timeline: 'Week 1-3: Python fundamentals and data manipulation, Week 4-6: Machine learning concepts and libraries, Week 7-8: Project development and documentation.',
-      documents: ['Academic_Records.pdf', 'Programming_Experience.pdf'],
-      submittedAt: '2025-01-21T14:15:00Z',
-      reviewNotes: 'Excellent project proposal with clear social impact. Strong academic background and relevant experience.',
-      reviewedAt: '2025-01-25T09:00:00Z'
-    },
-    {
-      id: 3,
-      student: {
-        name: 'Anita Patel',
-        email: 'anita.patel@email.com',
-        phone: '+91 9876543212',
-        profileImage: 'https://images.pexels.com/photos/3756681/pexels-photo-3756681.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-        institution: 'Mumbai University',
-        course: 'Computer Engineering',
-        year: '4th Year',
-        gpa: '8.9 CGPA',
-        city: 'Mumbai'
-      },
-      appliedDate: '2025-01-20',
-      status: 'in_review',
-      essay: 'As a final year student, I believe mastering Python will give me a competitive edge in the job market. I am particularly interested in using Python for automation and data analysis to improve business processes.',
-      projectPlan: 'I will create an automated testing framework for web applications using Python and Selenium. This project will help businesses ensure their web applications work correctly and save time on manual testing.',
-      timeline: 'Week 1-2: Advanced Python concepts, Week 3-5: Selenium and testing frameworks, Week 6-8: Building and documenting the testing framework.',
-      documents: ['Resume.pdf', 'Project_Portfolio.pdf', 'Recommendation_Letter.pdf'],
-      submittedAt: '2025-01-20T16:45:00Z'
-    },
-    {
-      id: 4,
-      student: {
-        name: 'Vikram Singh',
-        email: 'vikram.singh@email.com',
-        phone: '+91 9876543213',
-        profileImage: null,
-        institution: 'Pune University',
-        course: 'Software Engineering',
-        year: '1st Year',
-        gpa: '8.2 CGPA',
-        city: 'Pune'
-      },
-      appliedDate: '2025-01-19',
-      status: 'rejected',
-      essay: 'I want to learn Python to build websites and mobile apps.',
-      projectPlan: 'I will make a simple calculator app.',
-      timeline: 'I will learn Python in 4 weeks.',
-      documents: ['ID_Proof.pdf'],
-      submittedAt: '2025-01-19T11:20:00Z',
-      reviewNotes: 'Application lacks detail and depth. Project scope is too narrow for the scholarship requirements. Encourage reapplication with more comprehensive approach.',
-      reviewedAt: '2025-01-24T13:30:00Z'
+    if (id) {
+      fetchData();
     }
-  ];
+  }, [id]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -174,51 +98,79 @@ const ApplicationsManagement = () => {
 
   const handleApprove = async (applicationId) => {
     try {
-      // First approve the application
-      const approveResponse = await fetch(`/api/sponsors/applications/${applicationId}/approve`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!approveResponse.ok) {
-        throw new Error('Failed to approve application');
-      }
-
-      // Then credit the student's wallet
-      const creditResponse = await fetch('/api/wallet/credit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          applicationId: applicationId,
-          amount: scholarship.amount,
-          description: `Scholarship award for: ${scholarship.title}`
-        })
-      });
-
-      if (!creditResponse.ok) {
-        throw new Error('Failed to credit wallet');
-      }
-
+      // Approve the application using the API
+      await sponsorAPI.decideApplication(applicationId, { status: 'approved' });
+      
       alert(`Application ${applicationId} approved! ₹${scholarship.amount} has been credited to the student's wallet.`);
       
-      // Refresh the page to show updated status
-      window.location.reload();
+      // Refresh the data to show updated status
+      const response = await sponsorAPI.getScholarshipApplications(id);
+      setScholarship(response.scholarship);
+      setApplications(response.applications);
     } catch (error) {
       console.error('Error approving application:', error);
       alert(`Failed to approve application: ${error.message}`);
     }
   };
 
-  const handleReject = (applicationId) => {
-    // Handle rejection logic
-    alert(`Application ${applicationId} rejected.`);
+  const handleReject = async (applicationId) => {
+    try {
+      // Reject the application using the API
+      await sponsorAPI.decideApplication(applicationId, { status: 'rejected' });
+      
+      alert(`Application ${applicationId} rejected.`);
+      
+      // Refresh the data to show updated status
+      const response = await sponsorAPI.getScholarshipApplications(id);
+      setScholarship(response.scholarship);
+      setApplications(response.applications);
+    } catch (error) {
+      console.error('Error rejecting application:', error);
+      alert(`Failed to reject application: ${error.message}`);
+    }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No scholarship found
+  if (!scholarship) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600">Scholarship not found</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
