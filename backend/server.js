@@ -2,8 +2,8 @@ const http = require('http');
 const app = require('./app'); // Import the Express app configuration
 
 // 🚀 Server Configuration
-const port = process.env.PORT || 3000; // Use environment PORT or default to 3000
-const host = process.env.HOST || 'localhost'; // Use environment HOST or default to localhost
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || '0.0.0.0'; // ✅ Changed from 'localhost' to '0.0.0.0'
 
 // Create HTTP server using Express app
 const server = http.createServer(app);
@@ -16,7 +16,7 @@ server.listen(port, host, () => {
   console.log(`⏰ Started at: ${new Date().toISOString()}`);
   console.log(`📊 Health Check: http://${host}:${port}/api/health`);
   console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-  console.log(`🗄️  Database: ${process.env.MONGODB_URI || 'mongodb://localhost:27017/scholarbee'}`);
+  console.log(`🗄️  Database: ${process.env.MONGODB_URI ? '✅ MongoDB Connected' : '❌ No MongoDB URI found'}`);
   console.log('');
   console.log('📝 Available API Endpoints:');
   console.log('   • GET  /api/health - Health check');
@@ -37,7 +37,6 @@ server.on('error', (error) => {
 
   const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
-  // Handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
       console.error(`❌ ${bind} requires elevated privileges`);
@@ -70,6 +69,4 @@ process.on('SIGINT', () => {
     console.log('✅ Process terminated');
     process.exit(0);
   });
-}); 
-
-
+});
