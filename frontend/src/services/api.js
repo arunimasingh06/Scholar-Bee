@@ -1,4 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://scholarbeefinal-backend.onrender.com';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://scholarbeefinal-backend.onrender.com';
+
 
 // Generic API function
 const apiRequest = async (endpoint, method = 'GET', body = null, token = null) => {
