@@ -27,18 +27,34 @@ app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 
 //  CORS Configuration - Allow frontend to communicate with backend
-// Beginner-friendly: Allow all origins in development
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:3000',
+  'https://scholar-bee-ds1l.vercel.app', // ✅ Vercel frontend
+  process.env.FRONTEND_URL // Optional fallback from .env
+];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
-    : ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174', 'http://localhost:3000'],
+  origin: function (origin, callback) {
+  if (!origin || allowedOrigins.includes(origin)) {
+    callback(null, true);
+  } else {
+    console.warn('❌ CORS blocked origin:', origin);
+    callback(null, false); // 🔁 Allow graceful fail instead of crashing
+  }
+},
   credentials: true, // Allow cookies and authentication headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Origin', 'Accept'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // ✅ Handle preflight requests
+
 
 //  API Route Mounting - Organize routes by functionality
 app.use('/api/auth', authRoutes);                 // Authentication: Login, Register, Forgot Password
@@ -93,6 +109,3 @@ app.use('*', (req, res) => {
 });
 
 module.exports = app;
-// This is the main entry point for the backend server.
-// It sets up an Express server that listens on port 4000.
-// The server responds to GET requests at the root URL with a welcome message
