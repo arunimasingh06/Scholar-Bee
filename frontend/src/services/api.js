@@ -24,29 +24,41 @@ const apiRequest = async (endpoint, method = 'GET', body = null, token = null) =
   }
 };
 
-// Auth API
+// ---------------------- APIs ----------------------
+
+// Auth
 const authAPI = {
   login: (data) => apiRequest('/api/auth/login', 'POST', data),
   registerSponsor: (data) => apiRequest('/api/auth/register/sponsor', 'POST', data),
   registerStudent: (data) => apiRequest('/api/auth/register/student', 'POST', data),
 };
 
-// Student API
+// Student
 const studentAPI = {
   getDashboard: (token) => apiRequest('/api/students/dashboard', 'GET', null, token),
   getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
+  applyForScholarship: (data, token) => apiRequest('/api/students/apply', 'POST', data, token),
+  viewApplications: (token) => apiRequest('/api/students/applications', 'GET', null, token),
 };
 
-// Sponsor API
+// Sponsor
 const sponsorAPI = {
   getDashboard: (token) => apiRequest('/api/sponsors/dashboard', 'GET', null, token),
   getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
 };
 
-// ✅ Add userAPI
-const userAPI = {
-  getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
+// Public (for public routes like scholarship listing)
+const publicAPI = {
+  getAllScholarships: () => apiRequest('/api/public/scholarships', 'GET'),
+  getScholarshipById: (id) => apiRequest(`/api/public/scholarships/${id}`, 'GET'),
 };
 
-// ✅ Export all APIs
-export { authAPI, studentAPI, sponsorAPI, userAPI };
+// User (general profile etc.)
+const userAPI = {
+  getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
+  updateProfile: (data, token) => apiRequest('/api/users/profile', 'PUT', data, token),
+};
+
+// ---------------------- Export ----------------------
+
+export { authAPI, studentAPI, sponsorAPI, publicAPI, userAPI };
