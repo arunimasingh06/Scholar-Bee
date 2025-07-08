@@ -1,15 +1,15 @@
 const dotenv = require('dotenv');
-dotenv.config(); // Load environment variables from .env file into process.env
+dotenv.config(); // Load environment variables from .env file
 
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const connectToDb = require('./db/db'); // Import database connection function
+const connectToDb = require('./db/db');
 
-// Connect to MongoDB database
+// Connect to MongoDB
 connectToDb();
 
-// Route Imports - All API route modules
+// Import Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -22,87 +22,70 @@ const publicRoutes = require('./routes/publicRoute');
 const walletRoutes = require('./routes/walletRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
-//  Middleware Configuration
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-//  CORS Configuration - Allow frontend to communicate with backend
+// CORS
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://localhost:3000',
-  'https://scholar-bee-ds1l.vercel.app', // ✅ Vercel frontend
-  process.env.FRONTEND_URL // Optional fallback from .env
+  'https://scholar-bee-ds1l.vercel.app',
+  process.env.FRONTEND_URL
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-  if (!origin || allowedOrigins.includes(origin)) {
-    callback(null, true);
-  } else {
-    console.warn('❌ CORS blocked origin:', origin);
-    callback(null, false); // 🔁 Allow graceful fail instead of crashing
-  }
-},
-  credentials: true, // Allow cookies and authentication headers
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('❌ CORS blocked origin:', origin);
+      callback(null, false);
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Origin', 'Accept'],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ Handle preflight requests
 
-
-// ✅ Custom CORS Headers middleware (fixes Render + Vercel issue)
+// ✅ Manual CORS headers for Render (required for Vercel frontend)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:5174',
-    'http://localhost:3000',
-    'https://scholar-bee-ds1l.vercel.app',
-    process.env.FRONTEND_URL
-  ];
-
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Origin, Accept');
-
-  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
-
   next();
 });
 
+// Mount API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/students', studentRoutes);
+app.use('/api/sponsors', sponserRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/dashboards', dashboardRoutes);
+app.use('/api/institutional', institutionalRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api', publicRoutes);
 
-//  API Route Mounting - Organize routes by functionality
-app.use('/api/auth', authRoutes);                 // Authentication: Login, Register, Forgot Password
-app.use('/api/users', userRoutes);               // User Management: Profile, Change Password
-app.use('/api/students', studentRoutes);         // Student Features: Dashboard, Applications
-app.use('/api/sponsors', sponserRoutes);         // Sponsor Features: Dashboard, Scholarships
-app.use('/api/applications', applicationRoutes); // Application Management
-app.use('/api/admin', adminRoutes);              // Admin Dashboard & Management
-app.use('/api/dashboards', dashboardRoutes);     // NGO and Student Progress Dashboards
-app.use('/api/institutional', institutionalRoutes); // College and CSR Portals
-app.use('/api/wallet', walletRoutes);            // Student Wallet Management
-app.use('/api/payments', paymentRoutes);         // Sponsor Payment Management
-app.use('/api', publicRoutes);                   // Public Pages: Landing, About, Contact, Courses
-
-//  Health Check Endpoint
+// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'ScholarBEE Backend is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
@@ -110,18 +93,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-//  Global Error Handler
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('Global Error Handler:', err);
-  res.status(500).json({ 
+  res.status(500).json({
     message: 'Internal Server Error',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
   });
 });
 
-//  404 Handler for undefined routes
+// 404 fallback
 app.use('*', (req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     message: 'Route not found',
     path: req.originalUrl,
     availableRoutes: [
