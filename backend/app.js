@@ -56,17 +56,35 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // ✅ Handle preflight requests
 
 
-// ✅ Custom CORS Headers for Render + Vercel fix
+// ✅ Custom CORS Headers middleware (fixes Render + Vercel issue)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://localhost:3000',
+    'https://scholar-bee-ds1l.vercel.app',
+    process.env.FRONTEND_URL
+  ];
+
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
+
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token, Origin, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
   next();
 });
+
 
 //  API Route Mounting - Organize routes by functionality
 app.use('/api/auth', authRoutes);                 // Authentication: Login, Register, Forgot Password
