@@ -1,55 +1,45 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://scholarbeefinal-backend.onrender.com';
 
-async function apiRequest(path, options = {}) {
-  const url = `${API_BASE_URL}/api${path}`;
-
+// Generic API function
+const apiRequest = async (endpoint, method = 'GET', body = null, token = null) => {
   try {
-    const response = await fetch(url, {
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      method,
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
-      credentials: 'include',
-      ...options,
+      ...(body && { body: JSON.stringify(body) }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
+    if (!res.ok) {
+      const errorData = await res.json();
       throw new Error(errorData.message || 'Something went wrong');
     }
 
-    return await response.json();
+    return await res.json();
   } catch (error) {
     console.error('❌ API Request Error:', error);
     throw error;
   }
-}
-
-const authAPI = {
-  // Register user (student or sponsor)
-  registerStudent: (studentData) =>
-    apiRequest('/auth/student/signup', {
-      method: 'POST',
-      body: JSON.stringify(studentData),
-    }),
-
-  registerSponsor: (sponsorData) =>
-    apiRequest('/auth/sponsor/signup', {
-      method: 'POST',
-      body: JSON.stringify(sponsorData),
-    }),
-
-  // Login user (student, sponsor, admin)
-  login: (credentials, role = 'student') =>
-    apiRequest(`/auth/${role}/login`, {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    }),
-
-  // Logout
-  logout: () =>
-    apiRequest('/auth/logout', {
-      method: 'POST',
-    }),
 };
 
-export default authAPI;
+// Define your APIs
+const authAPI = {
+  login: (data) => apiRequest('/api/auth/login', 'POST', data),
+  registerSponsor: (data) => apiRequest('/api/auth/register/sponsor', 'POST', data),
+  registerStudent: (data) => apiRequest('/api/auth/register/student', 'POST', data),
+};
+
+const studentAPI = {
+  getDashboard: (token) => apiRequest('/api/students/dashboard', 'GET', null, token),
+  getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
+};
+
+const sponsorAPI = {
+  getDashboard: (token) => apiRequest('/api/sponsors/dashboard', 'GET', null, token),
+  getProfile: (token) => apiRequest('/api/users/profile', 'GET', null, token),
+};
+
+// Export APIs individually
+export { authAPI, studentAPI, sponsorAPI };
