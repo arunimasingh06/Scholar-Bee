@@ -1,4 +1,4 @@
-# 🐝 ScholarBEE - Empowering Students Through Scholarships
+# ScholarBEE - Empowering Students Through Scholarships
 
 A modern, full-stack scholarship management platform that connects students with educational opportunities and sponsors.
 
