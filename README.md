@@ -98,7 +98,7 @@ ScholarBEE/
 └── docs/            # Documentation
 ```
 
-## 🔌 API Highlights
+## 🔌 API Highlight
 
 ### Authentication
 ```bash
