@@ -13,7 +13,7 @@
 A Micro-scholarship is a small financial award typically given to students for specific achievements, milestones, or behaviors, rather than a large, lump-sum traditional scholarship. These can help students gradually earn money for college or other educational needs.
 ScholarBEE is a comprehensive Micro-scholarship management system that bridges the gap between students seeking financial aid and organizations offering scholarships.
 
-### Key Features of Micro-Scholarships
+### Key Features f Micro-Scholarships
 
 - **💰 Small Amounts**: Awards usually range from a few dollars to a few hundred dollars.
 
