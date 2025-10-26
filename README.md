@@ -19,7 +19,7 @@ ScholarBEE is a comprehensive Micro-scholarship management system that bridges t
 
 - **🧠 Merit-Based or Activity-Based**: Given for things like good grades, extracurricular involvement, community service, test scores, etc.
 
-- **🏫 Cumulative**: Stdents can earn multiple micro-scholarships over time, which add up.
+- **🏫 Cumulative**: Students can earn multiple micro-scholarships over time, which add up.
 
 - **🎯 Often Targeted at High School Students**: Especially those preparing for college.
 
